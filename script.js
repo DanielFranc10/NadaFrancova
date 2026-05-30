@@ -3,7 +3,8 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyq
 // --- KOMUNIKACE S GOOGLE TABULKOU ---
 async function fetchBlogs() {
     try {
-        const response = await fetch(API_URL + "?action=read");
+        // PŘIDÁN CACHE-BUSTER: Prohlížeč teď vždy stáhne nejnovější verzi z tabulky!
+        const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
         const data = await response.json();
         return data;
     } catch (err) {
@@ -26,14 +27,8 @@ async function renderBlogGrid() {
         return;
     }
 
-    let currentColumn = document.createElement('div');
-    
-    blogs.forEach((blog, index) => {
-        if (index > 0 && index % 2 === 0) {
-            container.appendChild(currentColumn);
-            currentColumn = document.createElement('div');
-        }
-
+    // Vykreslí články rovnou do 4-sloupcového gridu
+    blogs.forEach((blog) => {
         const article = document.createElement('article');
         article.className = 'post-card';
         article.innerHTML = `
@@ -41,12 +36,8 @@ async function renderBlogGrid() {
             <p>${blog.excerpt}</p>
             <time>${blog.date}</time>
         `;
-        currentColumn.appendChild(article);
+        container.appendChild(article);
     });
-    
-    if (currentColumn.hasChildNodes()) {
-        container.appendChild(currentColumn);
-    }
 }
 
 // --- VYKRESLENÍ DETAILU ROZKLIKNUTÉHO ČLÁNKU ---
@@ -141,7 +132,7 @@ async function deleteBlog(event, id) {
         btn.disabled = true;
 
         try {
-            await fetch(API_URL + "?action=delete&id=" + id, { method: "POST" });
+            await fetch(API_URL + "?action=delete&id=" + id, { method: "POST", redirect: "follow" });
             await renderAdminList(); 
         } catch (err) {
             alert("Chyba připojení k tabulce!");
@@ -178,12 +169,12 @@ async function addNewBlog(event) {
     };
 
     try {
-        // Zásadní krok: text/plain hlavička obchází CORS blokaci v prohlížeči
         await fetch(API_URL + "?action=add", {
             method: "POST",
             headers: {
                 "Content-Type": "text/plain;charset=utf-8",
             },
+            redirect: "follow",
             body: JSON.stringify(newBlog)
         });
         
