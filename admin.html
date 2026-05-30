@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrace | Ing. arch. Naďa Francová. Ph.D.</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <main class="container">
+        <div class="inner-content">
+            <header class="top-header">
+                <a href="index.html">← Zpět na web</a>
+            </header>
+
+            <div class="page-text">
+                <div id="login-screen" style="max-width: 400px; margin: 0 auto; text-align: center; display: none;">
+                    <h2>Přihlášení do administrace</h2>
+                    <br>
+                    <input type="text" id="admin-user" placeholder="Přihlašovací jméno" style="width: 100%; padding: 10px; margin-bottom: 10px;">
+                    <input type="password" id="admin-pass" placeholder="Heslo" style="width: 100%; padding: 10px; margin-bottom: 20px;">
+                    <button onclick="login()" style="padding: 10px 20px; background: #33322e; color: white; border: none; cursor: pointer; width: 100%;">Přihlásit</button>
+                </div>
+
+                <div id="admin-dashboard" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h1 style="font-size: 2rem; margin: 0;">Správa blogu</h1>
+                        <button onclick="logout()" style="padding: 8px 15px; background: transparent; border: 1px solid #33322e; cursor: pointer;">Odhlásit se</button>
+                    </div>
+                    
+                    <h3 style="margin-top: 0;">Přidat nový článek</h3>
+                    <form id="add-blog-form" class="admin-form" onsubmit="addNewBlog(event)">
+                        <input type="text" id="new-title" placeholder="Název článku" required>
+                        <input type="date" id="new-date" required>
+                        <input type="url" id="new-image" placeholder="URL adresa fotky (např. https://priklad.cz/fotka.jpg) - nepovinné">
+                        <textarea id="new-excerpt" rows="3" placeholder="Krátký popis (náhled do menu)" required></textarea>
+                        <textarea id="new-content" rows="10" placeholder="Celý text článku (můžeš používat HTML tagy jako <h2>, <p>)..." required></textarea>
+                        <button type="submit">Publikovat článek</button>
+                    </form>
+
+                    <h3 style="margin-top: 4rem;">Existující články</h3>
+                    <ul id="admin-post-list" class="admin-post-list">
+                        </ul>
+                </div>
+            </div>
+        </div>
+        <br><br>
+        <footer>
+            Systém pro správu obsahu
+        </footer>
+    </main>
+
+</body>
+</html>

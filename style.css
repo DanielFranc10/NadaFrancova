@@ -1,0 +1,317 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
+
+:root {
+    --bg-outer: #e6e4dc;     
+    --bg-inner: #f3efe6;     
+    --text-main: #33322e;    
+    --text-light: #5a5753;   
+    --line-color: #dfdcd2;   
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+@keyframes smoothLoad {
+    0% { 
+        opacity: 0; 
+        transform: translateY(10px) scale(0.99); 
+        filter: blur(3px);
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+        filter: blur(0);
+    }
+}
+
+body {
+    background-color: var(--bg-outer);
+    color: var(--text-main);
+    font-family: 'Montserrat', sans-serif;
+    line-height: 1.6;
+    padding: 3rem 1rem;
+    animation: smoothLoad 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background-color: var(--bg-inner);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.inner-content {
+    padding: 3rem 4rem 0 4rem;
+}
+
+.top-header {
+    border-bottom: 1px solid var(--line-color);
+    padding-bottom: 1rem;
+    margin-bottom: 3rem;
+}
+
+.top-header a {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    text-decoration: none;
+    transition: opacity 0.2s;
+}
+
+.top-header a:hover {
+    opacity: 0.7;
+}
+
+.hero {
+    display: flex;
+    gap: 3rem;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.hero-text {
+    flex: 1;
+}
+
+.hero-text h1 {
+    font-size: 2.2rem;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+}
+
+.hero-text p {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.hero-image {
+    flex: 1.5;
+}
+
+.hero-image img {
+    width: 100%;
+    filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.15)) sepia(0.3); 
+}
+
+.content-wrapper {
+    padding: 2rem 4rem 4rem 4rem;
+}
+
+.four-col-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.nav-item a {
+    text-decoration: none;
+    color: var(--text-main);
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-block;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.nav-item a:hover, .nav-item a.active {
+    border-bottom: 2px solid var(--text-main);
+}
+
+.blog-posts {
+    margin-top: 2rem;
+}
+
+.post-card {
+    margin-bottom: 3rem;
+    transition: transform 0.2s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+}
+
+.post-card h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.post-card h3 a {
+    color: var(--text-main);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.2s;
+}
+
+.post-card h3 a:hover {
+    color: var(--text-light);
+}
+
+.post-card p {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 1rem;
+}
+
+.post-card time {
+    font-size: 0.8rem;
+    color: var(--text-main);
+}
+
+.article-detail {
+    grid-column: span 4;
+    max-width: 800px;
+    margin: 2rem auto 0 auto;
+}
+
+.article-detail h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+}
+
+.article-detail .meta {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--line-color);
+    padding-bottom: 1rem;
+}
+
+.article-detail h2 {
+    font-size: 1.3rem;
+    margin: 2.5rem 0 1rem;
+}
+
+.article-detail p {
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    color: var(--text-main);
+}
+
+.page-text {
+    margin-top: 2rem;
+    grid-column: span 4;
+}
+
+.page-text p {
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.page-text h3 {
+    margin: 2.5rem 0 1rem;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+}
+
+.page-text ul {
+    list-style-type: none;
+    margin-bottom: 2rem;
+}
+
+.page-text li {
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+}
+
+.page-text strong {
+    color: var(--text-main);
+}
+
+footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    border-top: 1px solid var(--line-color);
+}
+
+/* NENÁPADNÝ ODKAZ DO ADMINU */
+.stealth-link {
+    color: inherit;
+    text-decoration: none;
+    cursor: text; /* Myš se nezmění na ručičku */
+    outline: none;
+}
+
+/* STYLY PRO ADMIN PANEL */
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    max-width: 100%;
+}
+
+.admin-form input, .admin-form textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--line-color);
+    background-color: var(--bg-outer);
+    font-family: inherit;
+    color: var(--text-main);
+    border-radius: 4px;
+}
+
+.admin-form button {
+    padding: 1rem 2rem;
+    background-color: var(--text-main);
+    color: var(--bg-inner);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: opacity 0.2s;
+    border-radius: 4px;
+}
+
+.admin-form button:hover {
+    opacity: 0.8;
+}
+
+.admin-post-list {
+    list-style: none !important; /* Přepis globálního stylu pro ul */
+    padding: 0;
+}
+
+.admin-post-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem;
+    background-color: var(--bg-outer);
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    border-left: 4px solid var(--text-main);
+}
+
+.admin-post-item span {
+    font-weight: 600;
+}
+
+.delete-btn {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 3px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.delete-btn:hover {
+    background-color: #c9302c;
+}
