@@ -1,33 +1,33 @@
-// TVOJE UNIKÁTNÍ ADRESA Z GOOGLE APPS SCRIPT
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
 
-// Funkce pro stažení článků z tabulky
+// --- KOMUNIKACE S GOOGLE TABULKOU ---
 async function fetchBlogs() {
     try {
         const response = await fetch(API_URL + "?action=read");
-        return await response.json();
+        const data = await response.json();
+        return data;
     } catch (err) {
-        console.error("Chyba při načítání dat z Google Tabulky:", err);
+        console.error("Chyba při načítání dat z Tabulky:", err);
         return [];
     }
 }
 
-// --- Vykreslení Mřížky (blog.html) ---
+// --- VYKRESLENÍ BLOGŮ DO MŘÍŽKY ---
 async function renderBlogGrid() {
     const container = document.getElementById('dynamic-blog-grid');
     if (!container) return;
 
-    container.innerHTML = '<p>Načítám články...</p>'; // Loading state
+    container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Načítám data z databáze...</p>'; 
     const blogs = await fetchBlogs();
     container.innerHTML = ''; 
 
-    if (blogs.length === 0) {
-        container.innerHTML = '<p>Zatím zde nejsou žádné články.</p>';
+    if (!blogs || blogs.length === 0) {
+        container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Na webu zatím nejsou publikovány žádné články.</p>';
         return;
     }
 
     let currentColumn = document.createElement('div');
-
+    
     blogs.forEach((blog, index) => {
         if (index > 0 && index % 2 === 0) {
             container.appendChild(currentColumn);
@@ -43,28 +43,28 @@ async function renderBlogGrid() {
         `;
         currentColumn.appendChild(article);
     });
-
+    
     if (currentColumn.hasChildNodes()) {
         container.appendChild(currentColumn);
     }
 }
 
-// --- Vykreslení detailu (clanek.html) ---
+// --- VYKRESLENÍ DETAILU ROZKLIKNUTÉHO ČLÁNKU ---
 async function renderSingleArticle() {
     const container = document.getElementById('dynamic-article');
     if (!container) return;
 
-    container.innerHTML = '<p>Načítám článek...</p>';
+    container.innerHTML = '<p>Otevírám článek...</p>';
     const urlParams = new URLSearchParams(window.location.search);
     const blogId = urlParams.get('id');
-
+    
     const blogs = await fetchBlogs();
     const blog = blogs.find(b => b.id.toString() === blogId.toString());
 
     if (blog) {
         document.title = `${blog.title} | Blog`;
         let imageHtml = blog.image ? `<img src="${blog.image}" alt="${blog.title}" style="width:100%; max-height:400px; object-fit:cover; margin: 2rem 0; border-radius: 4px;">` : '';
-
+        
         container.innerHTML = `
             <h1>${blog.title}</h1>
             <div class="meta">Napsal administrator / ${blog.date}</div>
@@ -72,11 +72,11 @@ async function renderSingleArticle() {
             ${blog.content}
         `;
     } else {
-        container.innerHTML = `<h1>Článek nenalezen</h1><p>Tento článek neexistuje nebo byl smazán.</p><a href="blog.html">Zpět na blog</a>`;
+        container.innerHTML = `<h1>Článek nenalezen</h1><p>Tento článek neexistuje nebo byl stažen.</p><a href="blog.html">← Zpět na blog</a>`;
     }
 }
 
-// --- Administrace ---
+// --- ADMINISTRACE A PŘIHLAŠOVÁNÍ ---
 function checkLogin() {
     const adminSection = document.getElementById('admin-dashboard');
     const loginSection = document.getElementById('login-screen');
@@ -113,9 +113,14 @@ async function renderAdminList() {
     const list = document.getElementById('admin-post-list');
     if (!list) return;
 
-    list.innerHTML = '<li>Načítám články ze serveru...</li>';
+    list.innerHTML = '<li>Načítám data z Google serveru...</li>';
     const blogs = await fetchBlogs();
     list.innerHTML = '';
+
+    if (!blogs || blogs.length === 0) {
+        list.innerHTML = '<li>Tabulka je zatím prázdná.</li>';
+        return;
+    }
 
     blogs.forEach(blog => {
         const li = document.createElement('li');
@@ -128,27 +133,29 @@ async function renderAdminList() {
     });
 }
 
+// --- MAZÁNÍ ČLÁNKU ---
 async function deleteBlog(event, id) {
-    if(confirm("Opravdu chcete tento článek trvale smazat? Zmizí i z tabulky.")) {
+    if(confirm("Smazat článek? Provede se okamžitě i v tabulce.")) {
         const btn = event.target;
         btn.innerText = "Mažu...";
         btn.disabled = true;
 
         try {
             await fetch(API_URL + "?action=delete&id=" + id, { method: "POST" });
-            await renderAdminList(); // Překreslí seznam
+            await renderAdminList(); 
         } catch (err) {
-            alert("Chyba při mazání!");
+            alert("Chyba připojení k tabulce!");
             btn.innerText = "Smazat";
             btn.disabled = false;
         }
     }
 }
 
+// --- PŘIDÁNÍ NOVÉHO ČLÁNKU PŘES FORMULÁŘ ---
 async function addNewBlog(event) {
     event.preventDefault();
     const btn = event.target.querySelector('button[type="submit"]');
-    btn.innerText = "Publikuji...";
+    btn.innerText = "Odesílám data do tabulky...";
     btn.disabled = true;
 
     const title = document.getElementById('new-title').value;
@@ -171,23 +178,28 @@ async function addNewBlog(event) {
     };
 
     try {
-        // Odešle data do Google Tabulky
+        // Zásadní krok: text/plain hlavička obchází CORS blokaci v prohlížeči
         await fetch(API_URL + "?action=add", {
             method: "POST",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8",
+            },
             body: JSON.stringify(newBlog)
         });
-
+        
         document.getElementById('add-blog-form').reset();
         await renderAdminList();
-        alert('Článek byl úspěšně zapsán do tabulky a publikován na web!');
+        alert('Článek úspěšně publikován na web!');
     } catch (err) {
-        alert("Chyba při odesílání do tabulky!");
+        alert("Něco se pokazilo, zkontrolujte konzoli.");
+        console.error(err);
     }
 
     btn.innerText = "Publikovat článek";
     btn.disabled = false;
 }
 
+// Inicializace funkcí
 document.addEventListener('DOMContentLoaded', () => {
     renderBlogGrid();
     renderSingleArticle();
