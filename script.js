@@ -3,7 +3,6 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyq
 // --- KOMUNIKACE S GOOGLE TABULKOU ---
 async function fetchBlogs() {
     try {
-        // PŘIDÁN CACHE-BUSTER: Prohlížeč teď vždy stáhne nejnovější verzi z tabulky!
         const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
         const data = await response.json();
         return data;
@@ -13,7 +12,7 @@ async function fetchBlogs() {
     }
 }
 
-// --- VYKRESLENÍ BLOGŮ DO MŘÍŽKY ---
+// --- VYKRESLENÍ BLOGŮ DO MŘÍŽKY (PRO ZÁLOŽKU BLOG) ---
 async function renderBlogGrid() {
     const container = document.getElementById('dynamic-blog-grid');
     if (!container) return;
@@ -27,8 +26,14 @@ async function renderBlogGrid() {
         return;
     }
 
-    // Vykreslí články rovnou do 4-sloupcového gridu
-    blogs.forEach((blog) => {
+    let currentColumn = document.createElement('div');
+    
+    blogs.forEach((blog, index) => {
+        if (index > 0 && index % 2 === 0) {
+            container.appendChild(currentColumn);
+            currentColumn = document.createElement('div');
+        }
+
         const article = document.createElement('article');
         article.className = 'post-card';
         article.innerHTML = `
@@ -36,8 +41,51 @@ async function renderBlogGrid() {
             <p>${blog.excerpt}</p>
             <time>${blog.date}</time>
         `;
-        container.appendChild(article);
+        currentColumn.appendChild(article);
     });
+    
+    if (currentColumn.hasChildNodes()) {
+        container.appendChild(currentColumn);
+    }
+}
+
+// --- VYKRESLENÍ NEJNOVĚJŠÍCH ČLÁNKŮ (PRO INDEX.HTML) ---
+async function renderRecentBlogs() {
+    const container = document.getElementById('recent-blog-grid');
+    if (!container) return;
+
+    container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Načítám nejnovější články...</p>'; 
+    const blogs = await fetchBlogs();
+    container.innerHTML = ''; 
+
+    if (!blogs || blogs.length === 0) {
+        container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Na webu zatím nejsou publikovány žádné články.</p>';
+        return;
+    }
+
+    // Ořízneme pole pouze na první 4 nejnovější články
+    const recentBlogs = blogs.slice(0, 4);
+    let currentColumn = document.createElement('div');
+    
+    recentBlogs.forEach((blog, index) => {
+        if (index > 0 && index % 2 === 0) {
+            container.appendChild(currentColumn);
+            currentColumn = document.createElement('div');
+        }
+
+        const article = document.createElement('article');
+        article.className = 'post-card';
+        article.innerHTML = `
+            <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
+            <p>${blog.excerpt}</p>
+            <time>${blog.date}</time>
+        `;
+        currentColumn.appendChild(article);
+    });
+    
+    if (currentColumn.hasChildNodes()) {
+        container.appendChild(currentColumn);
+    }
 }
 
 // --- VYKRESLENÍ DETAILU ROZKLIKNUTÉHO ČLÁNKU ---
@@ -190,9 +238,10 @@ async function addNewBlog(event) {
     btn.disabled = false;
 }
 
-// Inicializace funkcí
+// Inicializace funkcí (zavoláme i tu novou pro Index)
 document.addEventListener('DOMContentLoaded', () => {
     renderBlogGrid();
+    renderRecentBlogs();
     renderSingleArticle();
     checkLogin();
 });
