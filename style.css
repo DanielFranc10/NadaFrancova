@@ -120,8 +120,16 @@ body {
 .page-text ul { list-style-type: disc; margin: 0 0 1.5rem 1.5rem; }
 .page-text li { margin-bottom: 0.5rem; font-size: 0.95rem; }
 
-.about-intro { display: flex; gap: 3rem; align-items: flex-start; margin-bottom: 3rem; }
-.about-intro img { max-width: 300px; width: 100%; border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+/* Fotka přes celou šířku v sekci O mně */
+.about-image-full {
+    width: 100%;
+    height: auto;
+    max-height: 450px; 
+    object-fit: cover; 
+    border-radius: 4px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+    margin-bottom: 2.5rem;
+}
 
 /* Detail článku */
 .article-detail { max-width: 800px; margin: 0 auto; }
@@ -138,13 +146,49 @@ footer { text-align: center; padding-top: 3rem; margin-top: 4rem; font-size: 0.8
 .admin-post-item { display: flex; justify-content: space-between; padding: 1rem; background-color: var(--bg-outer); margin-bottom: 0.5rem; border-left: 4px solid var(--text-main); }
 .delete-btn { background-color: #d9534f; color: white; border: none; padding: 0.5rem 1rem; cursor: pointer; }
 
-/* Fotka přes celou šířku v sekci O mně */
-.about-image-full {
-    width: 100%;
-    height: auto;
-    max-height: 450px; /* Zabrání tomu, aby fotka zabrala celou obrazovku na výšku */
-    object-fit: cover; /* Zajistí, že se fotka nedeformuje, ale hezky vyplní prostor */
-    border-radius: 4px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.06);
-    margin-bottom: 2.5rem;
+
+/* =========================================================
+   RESPONZIVNÍ DESIGN PRO MOBILY A TABLETY
+========================================================= */
+
+@media (max-width: 768px) {
+    /* Zmenšení vnějších okrajů na mobilu */
+    body { padding: 0; }
+    .container { padding: 1.5rem; box-shadow: none; }
+
+    /* Hero sekce pod sebou */
+    .hero { flex-direction: column; gap: 2rem; text-align: center; }
+    .hero-text h1 { font-size: 1.8rem; }
+    .hero-image { width: 90%; margin: 0 auto; }
+
+    /* Navigace 2x2 na mobilu a vycentrování ikonek */
+    .nav-grid { 
+        grid-template-columns: repeat(2, 1fr); 
+        gap: 1.5rem; 
+        text-align: center; 
+        border-bottom: none; 
+    }
+    .nav-item { align-items: center; }
+    .nav-icon { height: 35px; }
+
+    /* Mřížky pro blog do 1 sloupce */
+    .blog-grid-4, 
+    .blog-grid-3 { 
+        grid-template-columns: 1fr; 
+        gap: 2rem; 
+    }
+
+    /* Stránka O mně - oprava roztažení sloupců na mobilu */
+    .blog-grid-4 > div[style*="grid-column: span 2"] {
+        grid-column: span 1 !important;
+    }
+
+    /* Detail článku úprava nadpisu */
+    .article-detail h1 { font-size: 1.6rem; }
+
+    /* Paginace */
+    div[style*="display: flex; justify-content: space-between;"] {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
 }
