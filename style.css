@@ -137,3 +137,14 @@ footer { text-align: center; padding-top: 3rem; margin-top: 4rem; font-size: 0.8
 .admin-form button { padding: 1rem; background-color: var(--text-main); color: var(--bg-inner); border: none; cursor: pointer; font-weight: 600; text-transform: uppercase; }
 .admin-post-item { display: flex; justify-content: space-between; padding: 1rem; background-color: var(--bg-outer); margin-bottom: 0.5rem; border-left: 4px solid var(--text-main); }
 .delete-btn { background-color: #d9534f; color: white; border: none; padding: 0.5rem 1rem; cursor: pointer; }
+
+/* Fotka přes celou šířku v sekci O mně */
+.about-image-full {
+    width: 100%;
+    height: auto;
+    max-height: 450px; /* Zabrání tomu, aby fotka zabrala celou obrazovku na výšku */
+    object-fit: cover; /* Zajistí, že se fotka nedeformuje, ale hezky vyplní prostor */
+    border-radius: 4px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.06);
+    margin-bottom: 2.5rem;
+}
