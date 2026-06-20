@@ -1,94 +1,65 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
 
-// --- KOMUNIKACE S GOOGLE TABULKOU ---
 async function fetchBlogs() {
     try {
         const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
-        const data = await response.json();
-        return data;
+        return await response.json();
     } catch (err) {
-        console.error("Chyba při načítání dat z Tabulky:", err);
-        return [];
+        console.error("Chyba DB:", err); return [];
     }
 }
 
-// --- VYKRESLENÍ BLOGŮ DO MŘÍŽKY (PRO ZÁLOŽKU BLOG) ---
-async function renderBlogGrid() {
-    const container = document.getElementById('dynamic-blog-grid');
+// 1. Pro Úvodní stránku (4 sloupce pod menu, čistý text)
+async function renderIndexGrid() {
+    const container = document.getElementById('index-blog-grid');
     if (!container) return;
 
-    container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Načítám data z databáze...</p>'; 
+    container.innerHTML = '<p style="grid-column: span 4;">Načítám články...</p>'; 
     const blogs = await fetchBlogs();
     container.innerHTML = ''; 
 
-    if (!blogs || blogs.length === 0) {
-        container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Na webu zatím nejsou publikovány žádné články.</p>';
-        return;
-    }
+    if (blogs.length === 0) return;
 
-    let currentColumn = document.createElement('div');
-    
-    blogs.forEach((blog, index) => {
-        if (index > 0 && index % 2 === 0) {
-            container.appendChild(currentColumn);
-            currentColumn = document.createElement('div');
-        }
-
+    const recentBlogs = blogs.slice(0, 4); // Jen 4 články
+    recentBlogs.forEach(blog => {
         const article = document.createElement('article');
-        article.className = 'post-card';
+        article.className = 'snippet-card';
         article.innerHTML = `
             <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
             <p>${blog.excerpt}</p>
             <time>${blog.date}</time>
         `;
-        currentColumn.appendChild(article);
+        container.appendChild(article);
     });
-    
-    if (currentColumn.hasChildNodes()) {
-        container.appendChild(currentColumn);
-    }
 }
 
-// --- VYKRESLENÍ NEJNOVĚJŠÍCH ČLÁNKŮ (PRO INDEX.HTML) ---
-async function renderRecentBlogs() {
-    const container = document.getElementById('recent-blog-grid');
+// 2. Pro stránku Blog (3 sloupce, fotky, karty)
+async function renderBlogPageGrid() {
+    const container = document.getElementById('full-blog-grid');
     if (!container) return;
 
-    container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Načítám nejnovější články...</p>'; 
+    container.innerHTML = '<p style="grid-column: span 3; text-align: center;">Načítám články...</p>'; 
     const blogs = await fetchBlogs();
     container.innerHTML = ''; 
 
-    if (!blogs || blogs.length === 0) {
-        container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Na webu zatím nejsou publikovány žádné články.</p>';
-        return;
-    }
-
-    // Ořízneme pole pouze na první 4 nejnovější články
-    const recentBlogs = blogs.slice(0, 4);
-    let currentColumn = document.createElement('div');
-    
-    recentBlogs.forEach((blog, index) => {
-        if (index > 0 && index % 2 === 0) {
-            container.appendChild(currentColumn);
-            currentColumn = document.createElement('div');
-        }
-
+    blogs.forEach(blog => {
         const article = document.createElement('article');
-        article.className = 'post-card';
+        article.className = 'full-card';
+        let imgHtml = blog.image ? `<img src="${blog.image}" alt="">` : '';
         article.innerHTML = `
-            <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
-            <p>${blog.excerpt}</p>
-            <time>${blog.date}</time>
+            ${imgHtml}
+            <div class="full-card-content">
+                <span class="cat-tag">Uncategorized</span>
+                <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
+                <div class="meta">administrator / ${blog.date}</div>
+                <p>${blog.excerpt}</p>
+            </div>
         `;
-        currentColumn.appendChild(article);
+        container.appendChild(article);
     });
-    
-    if (currentColumn.hasChildNodes()) {
-        container.appendChild(currentColumn);
-    }
 }
 
-// --- VYKRESLENÍ DETAILU ROZKLIKNUTÉHO ČLÁNKU ---
+// 3. Detail článku
 async function renderSingleArticle() {
     const container = document.getElementById('dynamic-article');
     if (!container) return;
@@ -96,152 +67,77 @@ async function renderSingleArticle() {
     container.innerHTML = '<p>Otevírám článek...</p>';
     const urlParams = new URLSearchParams(window.location.search);
     const blogId = urlParams.get('id');
-    
     const blogs = await fetchBlogs();
     const blog = blogs.find(b => b.id.toString() === blogId.toString());
 
     if (blog) {
         document.title = `${blog.title} | Blog`;
-        let imageHtml = blog.image ? `<img src="${blog.image}" alt="${blog.title}" style="width:100%; max-height:400px; object-fit:cover; margin: 2rem 0; border-radius: 4px;">` : '';
-        
+        let imgHtml = blog.image ? `<img src="${blog.image}" style="width:100%; max-height:400px; object-fit:cover; margin-bottom: 2rem;">` : '';
         container.innerHTML = `
             <h1>${blog.title}</h1>
             <div class="meta">Napsal administrator / ${blog.date}</div>
-            ${imageHtml}
-            ${blog.content}
+            ${imgHtml}
+            <div class="page-text">${blog.content}</div>
         `;
     } else {
-        container.innerHTML = `<h1>Článek nenalezen</h1><p>Tento článek neexistuje nebo byl stažen.</p><a href="blog.html">← Zpět na blog</a>`;
+        container.innerHTML = `<h1>Nenalezeno</h1><a href="blog.html">Zpět</a>`;
     }
 }
 
-// --- ADMINISTRACE A PŘIHLAŠOVÁNÍ ---
+// 4. Admin
 function checkLogin() {
-    const adminSection = document.getElementById('admin-dashboard');
-    const loginSection = document.getElementById('login-screen');
-    if (!adminSection || !loginSection) return;
-
+    const adminS = document.getElementById('admin-dashboard');
+    const loginS = document.getElementById('login-screen');
+    if (!adminS) return;
     if (sessionStorage.getItem('isLoggedIn') === 'true') {
-        loginSection.style.display = 'none';
-        adminSection.style.display = 'block';
-        renderAdminList();
+        loginS.style.display = 'none'; adminS.style.display = 'block'; renderAdminList();
     } else {
-        loginSection.style.display = 'block';
-        adminSection.style.display = 'none';
+        loginS.style.display = 'block'; adminS.style.display = 'none';
     }
 }
-
 function login() {
-    const user = document.getElementById('admin-user').value;
-    const pass = document.getElementById('admin-pass').value;
-
-    if (user === 'francova' && pass === '654321') {
-        sessionStorage.setItem('isLoggedIn', 'true');
-        checkLogin();
-    } else {
-        alert('Špatné jméno nebo heslo!');
-    }
+    if (document.getElementById('admin-user').value === 'francova' && document.getElementById('admin-pass').value === '654321') {
+        sessionStorage.setItem('isLoggedIn', 'true'); checkLogin();
+    } else alert('Chyba!');
 }
-
-function logout() {
-    sessionStorage.removeItem('isLoggedIn');
-    checkLogin();
-}
+function logout() { sessionStorage.removeItem('isLoggedIn'); checkLogin(); }
 
 async function renderAdminList() {
     const list = document.getElementById('admin-post-list');
-    if (!list) return;
-
-    list.innerHTML = '<li>Načítám data z Google serveru...</li>';
+    list.innerHTML = '<li>Načítám...</li>';
     const blogs = await fetchBlogs();
     list.innerHTML = '';
-
-    if (!blogs || blogs.length === 0) {
-        list.innerHTML = '<li>Tabulka je zatím prázdná.</li>';
-        return;
-    }
-
-    blogs.forEach(blog => {
-        const li = document.createElement('li');
-        li.className = 'admin-post-item';
-        li.innerHTML = `
-            <span>${blog.title}</span>
-            <button class="delete-btn" onclick="deleteBlog(event, '${blog.id}')">Smazat</button>
-        `;
-        list.appendChild(li);
+    blogs.forEach(b => {
+        list.innerHTML += `<li class="admin-post-item"><span>${b.title}</span><button class="delete-btn" onclick="deleteBlog(event, '${b.id}')">Smazat</button></li>`;
     });
 }
-
-// --- MAZÁNÍ ČLÁNKU ---
-async function deleteBlog(event, id) {
-    if(confirm("Smazat článek? Provede se okamžitě i v tabulce.")) {
-        const btn = event.target;
-        btn.innerText = "Mažu...";
-        btn.disabled = true;
-
-        try {
-            await fetch(API_URL + "?action=delete&id=" + id, { method: "POST", redirect: "follow" });
-            await renderAdminList(); 
-        } catch (err) {
-            alert("Chyba připojení k tabulce!");
-            btn.innerText = "Smazat";
-            btn.disabled = false;
-        }
+async function deleteBlog(e, id) {
+    if(confirm("Smazat?")) {
+        e.target.innerText = "Mažu...";
+        await fetch(API_URL + "?action=delete&id=" + id, { method: "POST", redirect: "follow" });
+        renderAdminList(); 
     }
 }
-
-// --- PŘIDÁNÍ NOVÉHO ČLÁNKU PŘES FORMULÁŘ ---
-async function addNewBlog(event) {
-    event.preventDefault();
-    const btn = event.target.querySelector('button[type="submit"]');
-    btn.innerText = "Odesílám data do tabulky...";
-    btn.disabled = true;
-
-    const title = document.getElementById('new-title').value;
-    const date = document.getElementById('new-date').value;
-    const excerpt = document.getElementById('new-excerpt').value;
-    const image = document.getElementById('new-image').value;
-    const content = document.getElementById('new-content').value;
-
-    const dateObj = new Date(date);
+async function addNewBlog(e) {
+    e.preventDefault();
+    const btn = e.target.querySelector('button'); btn.innerText = "Odesílám...";
+    const dateObj = new Date(document.getElementById('new-date').value);
     const months = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"];
-    const formattedDate = `${dateObj.getDate()} ${months[dateObj.getMonth()]}, ${dateObj.getFullYear()}`;
-
-    const newBlog = {
+    const obj = {
         id: Date.now().toString(),
-        title: title,
-        date: formattedDate,
-        excerpt: excerpt,
-        image: image,
-        content: content.replace(/\n/g, '<br>') 
+        title: document.getElementById('new-title').value,
+        date: `${dateObj.getDate()} ${months[dateObj.getMonth()]}, ${dateObj.getFullYear()}`,
+        excerpt: document.getElementById('new-excerpt').value,
+        image: document.getElementById('new-image').value,
+        content: document.getElementById('new-content').value.replace(/\n/g, '<br>')
     };
-
-    try {
-        await fetch(API_URL + "?action=add", {
-            method: "POST",
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8",
-            },
-            redirect: "follow",
-            body: JSON.stringify(newBlog)
-        });
-        
-        document.getElementById('add-blog-form').reset();
-        await renderAdminList();
-        alert('Článek úspěšně publikován na web!');
-    } catch (err) {
-        alert("Něco se pokazilo, zkontrolujte konzoli.");
-        console.error(err);
-    }
-
-    btn.innerText = "Publikovat článek";
-    btn.disabled = false;
+    await fetch(API_URL + "?action=add", { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow", body: JSON.stringify(obj) });
+    document.getElementById('add-blog-form').reset(); renderAdminList(); btn.innerText = "Publikovat";
 }
 
-// Inicializace funkcí (zavoláme i tu novou pro Index)
 document.addEventListener('DOMContentLoaded', () => {
-    renderBlogGrid();
-    renderRecentBlogs();
+    renderIndexGrid();
+    renderBlogPageGrid();
     renderSingleArticle();
     checkLogin();
 });
