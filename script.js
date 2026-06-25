@@ -3,63 +3,56 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyq
 async function fetchBlogs() {
     try {
         const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
-        return await response.json();
+        const data = await response.json();
+        // Spolehlivé seřazení od nejnovějšího (podle ID)
+        return data.sort((a, b) => b.id - a.id);
     } catch (err) {
-        console.error("Chyba DB:", err); return [];
+        console.error("Chyba při načítání dat z Tabulky:", err);
+        return [];
     }
 }
 
-// 1. Pro Úvodní stránku (4 sloupce pod menu, čistý text)
-async function renderIndexGrid() {
-    const container = document.getElementById('index-blog-grid');
+async function renderBlogGrid() {
+    const container = document.getElementById('dynamic-blog-grid');
     if (!container) return;
 
-    container.innerHTML = '<p style="grid-column: span 4;">Načítám články...</p>'; 
+    container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Načítám data z databáze...</p>'; 
     const blogs = await fetchBlogs();
     container.innerHTML = ''; 
 
-    if (blogs.length === 0) return;
+    if (!blogs || blogs.length === 0) {
+        container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Na webu zatím nejsou publikovány žádné články.</p>';
+        return;
+    }
 
-    const recentBlogs = blogs.slice(0, 4); // Jen 4 články
-    recentBlogs.forEach(blog => {
+    let currentColumn = document.createElement('div');
+    
+    blogs.forEach((blog, index) => {
+        if (index > 0 && index % 2 === 0) {
+            container.appendChild(currentColumn);
+            currentColumn = document.createElement('div');
+        }
+
         const article = document.createElement('article');
-        article.className = 'snippet-card';
+        article.className = 'post-card';
+        
+        // Zobrazení obrázku v gridu, pokud u článku existuje
+        const gridImage = blog.image ? `<a href="clanek.html?id=${blog.id}"><img src="${blog.image}" alt="" style="width: 100%; height: 160px; object-fit: cover; border-radius: 3px; margin-bottom: 1rem; filter: sepia(0.2);"></a>` : '';
+
         article.innerHTML = `
+            ${gridImage}
             <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
             <p>${blog.excerpt}</p>
             <time>${blog.date}</time>
         `;
-        container.appendChild(article);
+        currentColumn.appendChild(article);
     });
+    
+    if (currentColumn.hasChildNodes()) {
+        container.appendChild(currentColumn);
+    }
 }
 
-// 2. Pro stránku Blog (3 sloupce, fotky, karty)
-async function renderBlogPageGrid() {
-    const container = document.getElementById('full-blog-grid');
-    if (!container) return;
-
-    container.innerHTML = '<p style="grid-column: span 3; text-align: center;">Načítám články...</p>'; 
-    const blogs = await fetchBlogs();
-    container.innerHTML = ''; 
-
-    blogs.forEach(blog => {
-        const article = document.createElement('article');
-        article.className = 'full-card';
-        let imgHtml = blog.image ? `<img src="${blog.image}" alt="">` : '';
-        article.innerHTML = `
-            ${imgHtml}
-            <div class="full-card-content">
-                <span class="cat-tag">Uncategorized</span>
-                <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
-                <div class="meta">administrator / ${blog.date}</div>
-                <p>${blog.excerpt}</p>
-            </div>
-        `;
-        container.appendChild(article);
-    });
-}
-
-// 3. Detail článku
 async function renderSingleArticle() {
     const container = document.getElementById('dynamic-article');
     if (!container) return;
@@ -67,77 +60,138 @@ async function renderSingleArticle() {
     container.innerHTML = '<p>Otevírám článek...</p>';
     const urlParams = new URLSearchParams(window.location.search);
     const blogId = urlParams.get('id');
+    
     const blogs = await fetchBlogs();
     const blog = blogs.find(b => b.id.toString() === blogId.toString());
 
     if (blog) {
         document.title = `${blog.title} | Blog`;
-        let imgHtml = blog.image ? `<img src="${blog.image}" style="width:100%; max-height:400px; object-fit:cover; margin-bottom: 2rem;">` : '';
+        let imageHtml = blog.image ? `<img src="${blog.image}" alt="${blog.title}" style="width:100%; max-height:400px; object-fit:cover; margin: 2rem 0; border-radius: 4px;">` : '';
+        
         container.innerHTML = `
             <h1>${blog.title}</h1>
             <div class="meta">Napsal administrator / ${blog.date}</div>
-            ${imgHtml}
-            <div class="page-text">${blog.content}</div>
+            ${imageHtml}
+            ${blog.content}
         `;
     } else {
-        container.innerHTML = `<h1>Nenalezeno</h1><a href="blog.html">Zpět</a>`;
+        container.innerHTML = `<h1>Článek nenalezen</h1><p>Tento článek neexistuje nebo byl stažen.</p><a href="blog.html">← Zpět na blog</a>`;
     }
 }
 
-// 4. Admin
+/* Zbytek administrace zůstává naprosto beze změny */
 function checkLogin() {
-    const adminS = document.getElementById('admin-dashboard');
-    const loginS = document.getElementById('login-screen');
-    if (!adminS) return;
+    const adminSection = document.getElementById('admin-dashboard');
+    const loginSection = document.getElementById('login-screen');
+    if (!adminSection || !loginSection) return;
     if (sessionStorage.getItem('isLoggedIn') === 'true') {
-        loginS.style.display = 'none'; adminS.style.display = 'block'; renderAdminList();
+        loginSection.style.display = 'none';
+        adminSection.style.display = 'block';
+        renderAdminList();
     } else {
-        loginS.style.display = 'block'; adminS.style.display = 'none';
+        loginSection.style.display = 'block';
+        adminSection.style.display = 'none';
     }
 }
+
 function login() {
-    if (document.getElementById('admin-user').value === 'francova' && document.getElementById('admin-pass').value === '654321') {
-        sessionStorage.setItem('isLoggedIn', 'true'); checkLogin();
-    } else alert('Chyba!');
+    const user = document.getElementById('admin-user').value;
+    const pass = document.getElementById('admin-pass').value;
+    if (user === 'francova' && pass === '654321') {
+        sessionStorage.setItem('isLoggedIn', 'true');
+        checkLogin();
+    } else {
+        alert('Špatné jméno nebo heslo!');
+    }
 }
-function logout() { sessionStorage.removeItem('isLoggedIn'); checkLogin(); }
+
+function logout() {
+    sessionStorage.removeItem('isLoggedIn');
+    checkLogin();
+}
 
 async function renderAdminList() {
     const list = document.getElementById('admin-post-list');
-    list.innerHTML = '<li>Načítám...</li>';
+    if (!list) return;
+    list.innerHTML = '<li>Načítám data z Google serveru...</li>';
     const blogs = await fetchBlogs();
     list.innerHTML = '';
-    blogs.forEach(b => {
-        list.innerHTML += `<li class="admin-post-item"><span>${b.title}</span><button class="delete-btn" onclick="deleteBlog(event, '${b.id}')">Smazat</button></li>`;
+    if (!blogs || blogs.length === 0) {
+        list.innerHTML = '<li>Tabulka je zatím prázdná.</li>';
+        return;
+    }
+    blogs.forEach(blog => {
+        const li = document.createElement('li');
+        li.className = 'admin-post-item';
+        li.innerHTML = `
+            <span>${blog.title}</span>
+            <button class="delete-btn" onclick="deleteBlog(event, '${blog.id}')">Smazat</button>
+        `;
+        list.appendChild(li);
     });
 }
-async function deleteBlog(e, id) {
-    if(confirm("Smazat?")) {
-        e.target.innerText = "Mažu...";
-        await fetch(API_URL + "?action=delete&id=" + id, { method: "POST", redirect: "follow" });
-        renderAdminList(); 
+
+async function deleteBlog(event, id) {
+    if(confirm("Smazat článek? Provede se okamžitě i v tabulce.")) {
+        const btn = event.target;
+        btn.innerText = "Mažu...";
+        btn.disabled = true;
+        try {
+            await fetch(API_URL + "?action=delete&id=" + id, { method: "POST", redirect: "follow" });
+            await renderAdminList(); 
+        } catch (err) {
+            alert("Chyba připojení k tabulce!");
+            btn.innerText = "Smazat";
+            btn.disabled = false;
+        }
     }
 }
-async function addNewBlog(e) {
-    e.preventDefault();
-    const btn = e.target.querySelector('button'); btn.innerText = "Odesílám...";
-    const dateObj = new Date(document.getElementById('new-date').value);
+
+async function addNewBlog(event) {
+    event.preventDefault();
+    const btn = event.target.querySelector('button[type="submit"]');
+    btn.innerText = "Odesílám data do tabulky...";
+    btn.disabled = true;
+
+    const title = document.getElementById('new-title').value;
+    const date = document.getElementById('new-date').value;
+    const excerpt = document.getElementById('new-excerpt').value;
+    const image = document.getElementById('new-image').value;
+    const content = document.getElementById('new-content').value;
+
+    const dateObj = new Date(date);
     const months = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"];
-    const obj = {
+    const formattedDate = `${dateObj.getDate()} ${months[dateObj.getMonth()]}, ${dateObj.getFullYear()}`;
+
+    const newBlog = {
         id: Date.now().toString(),
-        title: document.getElementById('new-title').value,
-        date: `${dateObj.getDate()} ${months[dateObj.getMonth()]}, ${dateObj.getFullYear()}`,
-        excerpt: document.getElementById('new-excerpt').value,
-        image: document.getElementById('new-image').value,
-        content: document.getElementById('new-content').value.replace(/\n/g, '<br>')
+        title: title,
+        date: formattedDate,
+        excerpt: excerpt,
+        image: image,
+        content: content.replace(/\n/g, '<br>') 
     };
-    await fetch(API_URL + "?action=add", { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow", body: JSON.stringify(obj) });
-    document.getElementById('add-blog-form').reset(); renderAdminList(); btn.innerText = "Publikovat";
+
+    try {
+        await fetch(API_URL + "?action=add", {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            redirect: "follow",
+            body: JSON.stringify(newBlog)
+        });
+        document.getElementById('add-blog-form').reset();
+        await renderAdminList();
+        alert('Článek úspěšně publikován na web!');
+    } catch (err) {
+        alert("Něco se pokazilo, zkontrolujte konzoli.");
+        console.error(err);
+    }
+    btn.innerText = "Publikovat článek";
+    btn.disabled = false;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    renderIndexGrid();
-    renderBlogPageGrid();
+    renderBlogGrid();
     renderSingleArticle();
     checkLogin();
 });
