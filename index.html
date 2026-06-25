@@ -1,194 +1,53 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
-
-async function fetchBlogs() {
-    try {
-        const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
-        const data = await response.json();
-        return data.sort((a, b) => b.id - a.id);
-    } catch (err) {
-        console.error("Chyba při načítání dat z Tabulky:", err);
-        return [];
-    }
-}
-
-async function renderBlogGrid() {
-    const container = document.getElementById('dynamic-blog-grid');
-    if (!container) return;
-
-    container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Načítám data z databáze...</p>'; 
-    const blogs = await fetchBlogs();
-    container.innerHTML = ''; 
-
-    if (!blogs || blogs.length === 0) {
-        container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Na webu zatím nejsou publikovány žádné články.</p>';
-        return;
-    }
-
-    let currentColumn = document.createElement('div');
-    
-    blogs.forEach((blog, index) => {
-        if (index > 0 && index % 2 === 0) {
-            container.appendChild(currentColumn);
-            currentColumn = document.createElement('div');
-        }
-
-        const article = document.createElement('article');
-        article.className = 'post-card';
-        
-        const gridImage = blog.image ? `<a href="clanek.html?id=${blog.id}"><img src="${blog.image}" alt="" style="width: 100%; height: 160px; object-fit: cover; border-radius: 3px; margin-bottom: 1rem; filter: sepia(0.2);"></a>` : '';
-
-        article.innerHTML = `
-            ${gridImage}
-            <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
-            <p>${blog.excerpt}</p>
-            <time>${blog.date}</time>
-        `;
-        currentColumn.appendChild(article);
-    });
-    
-    if (currentColumn.hasChildNodes()) {
-        container.appendChild(currentColumn);
-    }
-}
-
-async function renderSingleArticle() {
-    const container = document.getElementById('dynamic-article');
-    if (!container) return;
-
-    container.innerHTML = '<p>Otevírám článek...</p>';
-    const urlParams = new URLSearchParams(window.location.search);
-    const blogId = urlParams.get('id');
-    
-    const blogs = await fetchBlogs();
-    const blog = blogs.find(b => b.id.toString() === blogId.toString());
-
-    if (blog) {
-        document.title = `${blog.title} | Blog`;
-        let imageHtml = blog.image ? `<img src="${blog.image}" alt="${blog.title}" style="width:100%; max-height:400px; object-fit:cover; margin: 2rem 0; border-radius: 4px;">` : '';
-        
-        container.innerHTML = `
-            <h1>${blog.title}</h1>
-            <div class="meta">Napsal administrator / ${blog.date}</div>
-            ${imageHtml}
-            ${blog.content}
-        `;
-    } else {
-        container.innerHTML = `<h1>Článek nenalezen</h1><p>Tento článek neexistuje nebo byl stažen.</p><a href="blog.html">← Zpět na blog</a>`;
-    }
-}
-
-function checkLogin() {
-    const adminSection = document.getElementById('admin-dashboard');
-    const loginSection = document.getElementById('login-screen');
-    if (!adminSection || !loginSection) return;
-    if (sessionStorage.getItem('isLoggedIn') === 'true') {
-        loginSection.style.display = 'none';
-        adminSection.style.display = 'block';
-        renderAdminList();
-    } else {
-        loginSection.style.display = 'block';
-        adminSection.style.display = 'none';
-    }
-}
-
-function login() {
-    const user = document.getElementById('admin-user').value;
-    const pass = document.getElementById('admin-pass').value;
-    if (user === 'francova' && pass === '654321') {
-        sessionStorage.setItem('isLoggedIn', 'true');
-        checkLogin();
-    } else {
-        alert('Špatné jméno nebo heslo!');
-    }
-}
-
-function logout() {
-    sessionStorage.removeItem('isLoggedIn');
-    checkLogin();
-}
-
-async function renderAdminList() {
-    const list = document.getElementById('admin-post-list');
-    if (!list) return;
-    list.innerHTML = '<li>Načítám data z Google serveru...</li>';
-    const blogs = await fetchBlogs();
-    list.innerHTML = '';
-    if (!blogs || blogs.length === 0) {
-        list.innerHTML = '<li>Tabulka je zatím prázdná.</li>';
-        return;
-    }
-    blogs.forEach(blog => {
-        const li = document.createElement('li');
-        li.className = 'admin-post-item';
-        li.innerHTML = `
-            <span>${blog.title}</span>
-            <button class="delete-btn" onclick="deleteBlog(event, '${blog.id}')">Smazat</button>
-        `;
-        list.appendChild(li);
-    });
-}
-
-async function deleteBlog(event, id) {
-    if(confirm("Smazat článek? Provede se okamžitě i v tabulce.")) {
-        const btn = event.target;
-        btn.innerText = "Mažu...";
-        btn.disabled = true;
-        try {
-            await fetch(API_URL + "?action=delete&id=" + id, { method: "POST", redirect: "follow" });
-            await renderAdminList(); 
-        } catch (err) {
-            alert("Chyba připojení k tabulce!");
-            btn.innerText = "Smazat";
-            btn.disabled = false;
-        }
-    }
-}
-
-async function addNewBlog(event) {
-    event.preventDefault();
-    const btn = event.target.querySelector('button[type="submit"]');
-    btn.innerText = "Odesílám data do tabulky...";
-    btn.disabled = true;
-
-    const title = document.getElementById('new-title').value;
-    const date = document.getElementById('new-date').value;
-    const excerpt = document.getElementById('new-excerpt').value;
-    const image = document.getElementById('new-image').value;
-    const content = document.getElementById('new-content').value;
-
-    const dateObj = new Date(date);
-    const months = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"];
-    const formattedDate = `${dateObj.getDate()} ${months[dateObj.getMonth()]}, ${dateObj.getFullYear()}`;
-
-    const newBlog = {
-        id: Date.now().toString(),
-        title: title,
-        date: formattedDate,
-        excerpt: excerpt,
-        image: image,
-        content: content.replace(/\n/g, '<br>') 
-    };
-
-    try {
-        await fetch(API_URL + "?action=add", {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            redirect: "follow",
-            body: JSON.stringify(newBlog)
-        });
-        document.getElementById('add-blog-form').reset();
-        await renderAdminList();
-        alert('Článek úspěšně publikován na web!');
-    } catch (err) {
-        alert("Něco se pokazilo, zkontrolujte konzoli.");
-        console.error(err);
-    }
-    btn.innerText = "Publikovat článek";
-    btn.disabled = false;
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    renderBlogGrid();
-    renderSingleArticle();
-    checkLogin();
-});
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Úvod | Ing. arch. Naďa Francová. Ph.D.</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <main class="container">
+        <div class="inner-content">
+            <header class="top-header">
+                <a href="index.html">Ing. arch. Naďa Francová. Ph.D.</a>
+            </header>
+            <section class="hero">
+                <div class="hero-text">
+                    <h1>ARCHITEKTURA &<br>VIZUALIZACE</h1>
+                    <p>I TEN NEJMENŠÍ DETAIL V SOBĚ UKRÝVÁ VLASTNÍ A NEPŘEBERNĚ PESTRÝ VESMÍR</p>
+                </div>
+                <div class="hero-image">
+                    <img src="nahled.png" alt="Architektura Vizualizace">
+                </div>
+            </section>
+        </div>
+        <div class="menu-band">
+            <nav class="four-col-grid">
+                <div class="nav-item">
+                    <img src="data:image/svg+xml;utf8,<svg viewBox='0 0 24 24' stroke='%2333322e' stroke-width='1' fill='none'><circle cx='12' cy='8' r='4'/><path d='M4 20c0-4 4-7 8-7s8 3 8 7'/></svg>" alt="O mně">
+                    <a href="o-mne.html">O MNĚ</a>
+                </div>
+                <div class="nav-item">
+                    <img src="data:image/svg+xml;utf8,<svg viewBox='0 0 24 24' stroke='%2333322e' stroke-width='1' fill='none'><path d='M12 2v20M8 2h8M8 22h8M5 10h14'/></svg>" alt="Služby">
+                    <a href="sluzby.html">SLUŽBY</a>
+                </div>
+                <div class="nav-item">
+                    <img src="data:image/svg+xml;utf8,<svg viewBox='0 0 24 24' stroke='%2333322e' stroke-width='1' fill='none'><path d='M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z'/></svg>" alt="Blog">
+                    <a href="blog.html">BLOG</a>
+                </div>
+                <div class="nav-item">
+                    <img src="data:image/svg+xml;utf8,<svg viewBox='0 0 24 24' stroke='%2333322e' stroke-width='1.5' fill='none'><path d='M12 3l8 6v4M4 9v12h16M9 21v-6h6v6'/><path d='M2 17l5 4h10l5-4'/></svg>" alt="Reference">
+                    <a href="reference.html">REFERENCE</a>
+                </div>
+            </nav>
+        </div>
+        <div class="content-wrapper">
+        </div>
+        <footer>
+            Copyright <a href="admin.html" class="stealth-link">©</a> 2026 Evoluce zateplování: Od HERAKLITU k hi-tech izolacím
+        </footer>
+    </main>
+</body>
+</html>
