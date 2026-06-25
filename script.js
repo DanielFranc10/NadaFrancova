@@ -4,7 +4,6 @@ async function fetchBlogs() {
     try {
         const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
         const data = await response.json();
-        // Spolehlivé seřazení od nejnovějšího (podle ID)
         return data.sort((a, b) => b.id - a.id);
     } catch (err) {
         console.error("Chyba při načítání dat z Tabulky:", err);
@@ -36,7 +35,6 @@ async function renderBlogGrid() {
         const article = document.createElement('article');
         article.className = 'post-card';
         
-        // Zobrazení obrázku v gridu, pokud u článku existuje
         const gridImage = blog.image ? `<a href="clanek.html?id=${blog.id}"><img src="${blog.image}" alt="" style="width: 100%; height: 160px; object-fit: cover; border-radius: 3px; margin-bottom: 1rem; filter: sepia(0.2);"></a>` : '';
 
         article.innerHTML = `
@@ -79,7 +77,6 @@ async function renderSingleArticle() {
     }
 }
 
-/* Zbytek administrace zůstává naprosto beze změny */
 function checkLogin() {
     const adminSection = document.getElementById('admin-dashboard');
     const loginSection = document.getElementById('login-screen');
