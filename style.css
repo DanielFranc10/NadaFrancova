@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 
 :root {
-    --bg-outer: #e6e3d8;
-    --bg-inner: #fdfaf4;
-    --bg-menu: #f1ede3;
-    --text-main: #33322e;
-    --text-light: #5a5753;
-    --line-color: #dfdcd2;
+    --bg-outer: #eee7d7;     
+    --bg-inner: #f7f0e4;     
+    --bg-icons: #f0e9d7;     
+    --text-main: #33322e;    
+    --text-light: #5a5753;   
+    --line-color: #dfdcd2;   
 }
 
 * {
@@ -30,14 +30,14 @@ body {
 }
 
 .container {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
     background-color: var(--bg-inner);
-    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
 .inner-content {
-    padding: 3rem 4rem 2rem 4rem;
+    padding: 3rem 4rem 0 4rem;
 }
 
 .top-header {
@@ -84,43 +84,47 @@ body {
 
 .hero-image img {
     width: 100%;
-    filter: drop-shadow(8px 12px 20px rgba(0,0,0,0.35)) sepia(0.15);
+    filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.15)) sepia(0.3); 
 }
 
-.menu-band {
-    background-color: var(--bg-menu);
-    padding: 2rem 4rem;
-    border-top: 1px solid var(--line-color);
-    border-bottom: 1px solid var(--line-color);
+.icon-bar {
+    background-color: var(--bg-icons);
+    padding: 1.5rem 4rem;
+    display: flex;
+    gap: 6rem;
 }
 
-.four-col-grid {
+.icon-bar a {
+    color: var(--text-main);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.icon-bar a:hover {
+    transform: translateY(-3px);
+    opacity: 0.7;
+}
+
+.content-wrapper {
+    padding: 2rem 4rem 4rem 4rem;
+}
+
+.nav-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 2rem;
-}
-
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-}
-
-.nav-item img {
-    width: 35px;
-    height: 35px;
-    opacity: 0.7;
-    margin-bottom: 0.5rem;
+    margin-bottom: 3rem;
 }
 
 .nav-item a {
     text-decoration: none;
     color: var(--text-main);
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     text-transform: uppercase;
     letter-spacing: 1px;
+    display: inline-block;
     padding-bottom: 4px;
     border-bottom: 2px solid transparent;
     transition: border-color 0.2s;
@@ -130,21 +134,20 @@ body {
     border-bottom: 2px solid var(--text-main);
 }
 
-.content-wrapper {
-    padding: 3rem 4rem 4rem 4rem;
+.blog-grid-3x2 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3rem 2rem;
 }
 
-.blog-posts { margin-top: 0; }
-
 .post-card {
-    margin-bottom: 3rem;
     transition: transform 0.2s ease;
 }
 
 .post-card:hover { transform: translateY(-2px); }
 
 .post-card h3 {
-    font-size: 0.95rem;
+    font-size: 1rem;
     margin-bottom: 1rem;
     line-height: 1.4;
 }
@@ -169,10 +172,35 @@ body {
     color: var(--text-main);
 }
 
+.pagination {
+    grid-column: span 3;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 3rem;
+}
+
+.pagination button {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--line-color);
+    background-color: var(--bg-inner);
+    color: var(--text-main);
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.pagination button:hover { background-color: var(--bg-outer); }
+.pagination button.active {
+    background-color: var(--text-main);
+    color: var(--bg-inner);
+    border-color: var(--text-main);
+}
+
 .article-detail {
-    grid-column: span 4;
     max-width: 800px;
-    margin: 0 auto;
+    margin: 2rem auto 0 auto;
 }
 
 .article-detail h1 {
@@ -201,7 +229,7 @@ body {
 }
 
 .page-text {
-    grid-column: span 4;
+    margin-top: 2rem;
 }
 
 .page-text p {
@@ -242,12 +270,64 @@ footer {
     outline: none;
 }
 
-.admin-form { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 3rem; max-width: 100%; }
-.admin-form input, .admin-form textarea { width: 100%; padding: 1rem; border: 1px solid var(--line-color); background-color: var(--bg-inner); font-family: inherit; color: var(--text-main); border-radius: 4px; }
-.admin-form button { padding: 1rem 2rem; background-color: var(--text-main); color: var(--bg-inner); border: none; cursor: pointer; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; transition: opacity 0.2s; border-radius: 4px; }
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    max-width: 100%;
+}
+
+.admin-form input, .admin-form textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--line-color);
+    background-color: var(--bg-outer);
+    font-family: inherit;
+    color: var(--text-main);
+    border-radius: 4px;
+}
+
+.admin-form button {
+    padding: 1rem 2rem;
+    background-color: var(--text-main);
+    color: var(--bg-inner);
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+}
+
 .admin-form button:hover { opacity: 0.8; }
-.admin-post-list { list-style: none !important; padding: 0; }
-.admin-post-item { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem; background-color: var(--bg-menu); margin-bottom: 1rem; border-radius: 4px; border-left: 4px solid var(--text-main); }
+
+.admin-post-list {
+    list-style: none !important;
+    padding: 0;
+}
+
+.admin-post-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem;
+    background-color: var(--bg-outer);
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    border-left: 4px solid var(--text-main);
+}
+
 .admin-post-item span { font-weight: 600; }
-.delete-btn { background-color: #d9534f; color: white; border: none; padding: 0.5rem 1rem; cursor: pointer; border-radius: 3px; font-weight: 600; transition: background-color 0.2s; }
+
+.delete-btn {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 3px;
+    font-weight: 600;
+}
+
 .delete-btn:hover { background-color: #c9302c; }
