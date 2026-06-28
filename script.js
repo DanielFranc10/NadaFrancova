@@ -1,53 +1,66 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
 
+let currentPage = 1;
+const blogsPerPage = 6;
+
 async function fetchBlogs() {
     try {
         const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
-        const data = await response.json();
-        return data.sort((a, b) => b.id - a.id);
+        return await response.json();
     } catch (err) {
-        console.error("Chyba při načítání dat z Tabulky:", err);
+        console.error("Chyba při načítání:", err);
         return [];
     }
 }
 
-async function renderBlogGrid() {
+async function renderBlogGrid(page = 1) {
+    currentPage = page;
     const container = document.getElementById('dynamic-blog-grid');
+    const pagination = document.getElementById('pagination-container');
     if (!container) return;
 
-    container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Načítám data z databáze...</p>'; 
+    container.innerHTML = '<p style="grid-column: span 3; text-align: center;">Načítám data z databáze...</p>'; 
     const blogs = await fetchBlogs();
     container.innerHTML = ''; 
 
     if (!blogs || blogs.length === 0) {
-        container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Na webu zatím nejsou publikovány žádné články.</p>';
+        container.innerHTML = '<p style="grid-column: span 3; text-align: center;">Zatím nejsou publikovány žádné články.</p>';
+        if (pagination) pagination.innerHTML = '';
         return;
     }
 
-    let currentColumn = document.createElement('div');
-    
-    blogs.forEach((blog, index) => {
-        if (index > 0 && index % 2 === 0) {
-            container.appendChild(currentColumn);
-            currentColumn = document.createElement('div');
-        }
+    const start = (currentPage - 1) * blogsPerPage;
+    const end = start + blogsPerPage;
+    const currentBlogs = blogs.slice(start, end);
 
+    currentBlogs.forEach((blog) => {
         const article = document.createElement('article');
         article.className = 'post-card';
-        
-        const gridImage = blog.image ? `<a href="clanek.html?id=${blog.id}"><img src="${blog.image}" alt="" style="width: 100%; height: 160px; object-fit: cover; border-radius: 3px; margin-bottom: 1rem; filter: sepia(0.2);"></a>` : '';
-
         article.innerHTML = `
-            ${gridImage}
             <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
             <p>${blog.excerpt}</p>
             <time>${blog.date}</time>
         `;
-        currentColumn.appendChild(article);
+        container.appendChild(article);
     });
+
+    renderPagination(blogs.length);
+}
+
+function renderPagination(totalItems) {
+    const paginationContainer = document.getElementById('pagination-container');
+    if (!paginationContainer) return;
     
-    if (currentColumn.hasChildNodes()) {
-        container.appendChild(currentColumn);
+    paginationContainer.innerHTML = '';
+    const totalPages = Math.ceil(totalItems / blogsPerPage);
+    if (totalPages <= 1) return;
+
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        btn.className = i === currentPage ? 'active' : '';
+        btn.onclick = () => renderBlogGrid(i);
+        paginationContainer.appendChild(btn);
     }
 }
 
@@ -81,6 +94,7 @@ function checkLogin() {
     const adminSection = document.getElementById('admin-dashboard');
     const loginSection = document.getElementById('login-screen');
     if (!adminSection || !loginSection) return;
+
     if (sessionStorage.getItem('isLoggedIn') === 'true') {
         loginSection.style.display = 'none';
         adminSection.style.display = 'block';
@@ -94,6 +108,7 @@ function checkLogin() {
 function login() {
     const user = document.getElementById('admin-user').value;
     const pass = document.getElementById('admin-pass').value;
+
     if (user === 'francova' && pass === '654321') {
         sessionStorage.setItem('isLoggedIn', 'true');
         checkLogin();
@@ -110,13 +125,16 @@ function logout() {
 async function renderAdminList() {
     const list = document.getElementById('admin-post-list');
     if (!list) return;
-    list.innerHTML = '<li>Načítám data z Google serveru...</li>';
+
+    list.innerHTML = '<li>Načítám data...</li>';
     const blogs = await fetchBlogs();
     list.innerHTML = '';
+
     if (!blogs || blogs.length === 0) {
         list.innerHTML = '<li>Tabulka je zatím prázdná.</li>';
         return;
     }
+
     blogs.forEach(blog => {
         const li = document.createElement('li');
         li.className = 'admin-post-item';
@@ -133,6 +151,7 @@ async function deleteBlog(event, id) {
         const btn = event.target;
         btn.innerText = "Mažu...";
         btn.disabled = true;
+
         try {
             await fetch(API_URL + "?action=delete&id=" + id, { method: "POST", redirect: "follow" });
             await renderAdminList(); 
@@ -147,7 +166,7 @@ async function deleteBlog(event, id) {
 async function addNewBlog(event) {
     event.preventDefault();
     const btn = event.target.querySelector('button[type="submit"]');
-    btn.innerText = "Odesílám data do tabulky...";
+    btn.innerText = "Odesílám...";
     btn.disabled = true;
 
     const title = document.getElementById('new-title').value;
@@ -176,13 +195,14 @@ async function addNewBlog(event) {
             redirect: "follow",
             body: JSON.stringify(newBlog)
         });
+        
         document.getElementById('add-blog-form').reset();
         await renderAdminList();
-        alert('Článek úspěšně publikován na web!');
+        alert('Publikováno!');
     } catch (err) {
-        alert("Něco se pokazilo, zkontrolujte konzoli.");
-        console.error(err);
+        alert("Chyba.");
     }
+
     btn.innerText = "Publikovat článek";
     btn.disabled = false;
 }
