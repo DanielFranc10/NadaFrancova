@@ -41,14 +41,14 @@ body {
 }
 
 .top-header {
-    border-bottom: 1px solid var(--line-color);
+    border-bottom: 1px solid #ffffff;
     padding-bottom: 1rem;
     margin-bottom: 3rem;
 }
 
 .top-header a {
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     color: var(--text-main);
     text-decoration: none;
     transition: opacity 0.2s;
@@ -59,7 +59,7 @@ body {
 .hero {
     display: flex;
     gap: 3rem;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 1rem;
 }
 
@@ -80,7 +80,7 @@ body {
     font-weight: 600;
 }
 
-.hero-image { flex: 1.5; }
+.hero-image { flex: 2; }
 
 .hero-image img {
     width: 100%;
@@ -91,7 +91,8 @@ body {
     background-color: var(--bg-icons);
     padding: 1.5rem 4rem;
     display: flex;
-    gap: 6rem;
+    justify-content: flex-start;
+    gap: 8rem;
 }
 
 .icon-bar a {
