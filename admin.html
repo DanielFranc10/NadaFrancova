@@ -8,11 +8,13 @@
     <script src="script.js" defer></script>
 </head>
 <body>
+
     <main class="container">
         <div class="inner-content">
             <header class="top-header">
                 <a href="index.html">← Zpět na web</a>
             </header>
+
             <div class="page-text">
                 <div id="login-screen" style="max-width: 400px; margin: 0 auto; text-align: center; display: none;">
                     <h2>Přihlášení do administrace</h2>
@@ -21,11 +23,13 @@
                     <input type="password" id="admin-pass" placeholder="Heslo" style="width: 100%; padding: 10px; margin-bottom: 20px;">
                     <button onclick="login()" style="padding: 10px 20px; background: #33322e; color: white; border: none; cursor: pointer; width: 100%;">Přihlásit</button>
                 </div>
+
                 <div id="admin-dashboard" style="display: none;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                         <h1 style="font-size: 2rem; margin: 0;">Správa blogu</h1>
                         <button onclick="logout()" style="padding: 8px 15px; background: transparent; border: 1px solid #33322e; cursor: pointer;">Odhlásit se</button>
                     </div>
+                    
                     <h3 style="margin-top: 0;">Přidat nový článek</h3>
                     <form id="add-blog-form" class="admin-form" onsubmit="addNewBlog(event)">
                         <input type="text" id="new-title" placeholder="Název článku" required>
@@ -35,9 +39,9 @@
                         <textarea id="new-content" rows="10" placeholder="Celý text článku (HTML tagy povoleny)..." required></textarea>
                         <button type="submit">Publikovat článek</button>
                     </form>
+
                     <h3 style="margin-top: 4rem;">Existující články</h3>
-                    <ul id="admin-post-list" class="admin-post-list">
-                    </ul>
+                    <ul id="admin-post-list" class="admin-post-list"></ul>
                 </div>
             </div>
         </div>
@@ -46,5 +50,6 @@
             Systém pro správu obsahu
         </footer>
     </main>
+
 </body>
 </html>
