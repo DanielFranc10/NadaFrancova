@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Administrace | Ing. arch. Naďa Francová. Ph.D.</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Knihovny pro profi textový editor (WordPress styl) -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -16,6 +21,7 @@
             </header>
 
             <div class="page-text">
+                <!-- PŘIHLAŠOVACÍ OBRAZOVKA -->
                 <div id="login-screen" style="max-width: 400px; margin: 0 auto; text-align: center; display: none;">
                     <h2>Přihlášení do administrace</h2>
                     <br>
@@ -24,24 +30,48 @@
                     <button onclick="login()" style="padding: 10px 20px; background: #33322e; color: white; border: none; cursor: pointer; width: 100%;">Přihlásit</button>
                 </div>
 
+                <!-- ADMIN PANEL -->
                 <div id="admin-dashboard" style="display: none;">
+                    
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                        <h1 style="font-size: 2rem; margin: 0;">Správa blogu</h1>
+                        <h1 style="font-size: 2rem; margin: 0;">Centrální systém</h1>
                         <button onclick="logout()" style="padding: 8px 15px; background: transparent; border: 1px solid #33322e; cursor: pointer;">Odhlásit se</button>
                     </div>
-                    
-                    <h3 style="margin-top: 0;">Přidat nový článek</h3>
-                    <form id="add-blog-form" class="admin-form" onsubmit="addNewBlog(event)">
-                        <input type="text" id="new-title" placeholder="Název článku" required>
-                        <input type="date" id="new-date" required>
-                        <input type="url" id="new-image" placeholder="URL adresa fotky (např. https://priklad.cz/fotka.jpg) - nepovinné">
-                        <textarea id="new-excerpt" rows="3" placeholder="Krátký popis (náhled do menu)" required></textarea>
-                        <textarea id="new-content" rows="10" placeholder="Celý text článku (HTML tagy povoleny)..." required></textarea>
-                        <button type="submit">Publikovat článek</button>
-                    </form>
 
-                    <h3 style="margin-top: 4rem;">Existující články</h3>
-                    <ul id="admin-post-list" class="admin-post-list"></ul>
+                    <!-- ZÁLOŽKY (Přepínání Blog / Tracker) -->
+                    <div class="admin-tabs">
+                        <button class="tab-btn active-tab" onclick="switchTab('blog')">Správa Blogu</button>
+                        <button class="tab-btn" onclick="switchTab('tracker')">Project Tracker</button>
+                    </div>
+
+                    <!-- ZÁLOŽKA 1: BLOG -->
+                    <div id="tab-blog" class="tab-content" style="display: block; margin-top: 2rem;">
+                        <h3 style="margin-top: 0;">Napsat nový článek</h3>
+                        
+                        <form id="add-blog-form" class="admin-form" onsubmit="addNewBlog(event)">
+                            <input type="text" id="new-title" placeholder="Název článku" required>
+                            <input type="date" id="new-date" required>
+                            <input type="text" id="new-excerpt" placeholder="Krátký perex (náhled do menu)" required>
+                            
+                            <!-- Zde běží profi editor -->
+                            <div style="background: white; color: black; border-radius: 4px;">
+                                <div id="editor-container" style="height: 400px;"></div>
+                            </div>
+                            
+                            <button type="submit" id="publish-btn" style="margin-top: 10px;">Publikovat článek</button>
+                        </form>
+
+                        <h3 style="margin-top: 4rem;">Existující články</h3>
+                        <ul id="admin-post-list" class="admin-post-list"></ul>
+                    </div>
+
+                    <!-- ZÁLOŽKA 2: PROJECT TRACKER -->
+                    <div id="tab-tracker" class="tab-content" style="display: none; margin-top: 2rem;">
+                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Tvůj Project Tracker se načítá níže. Kód zůstal nedotčený.</p>
+                        <!-- Sem vlož URL, kde ti běží tvůj Node.js server pro tracker -->
+                        <iframe src="http://localhost:3000" style="width: 100%; height: 800px; border: 1px solid #dfdcd2; border-radius: 8px;"></iframe>
+                    </div>
+
                 </div>
             </div>
         </div>
