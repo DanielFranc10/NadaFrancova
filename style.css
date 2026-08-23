@@ -337,3 +337,42 @@ footer {
 }
 
 .delete-btn:hover { background-color: #c9302c; }
+
+/* --- STYLY PRO ZÁLOŽKY A EDITOR V ADMIN PANELU --- */
+.admin-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--line-color);
+    padding-bottom: 10px;
+}
+
+.tab-btn {
+    background: transparent;
+    color: var(--text-light);
+    border: none;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 10px 15px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.tab-btn:hover {
+    color: var(--text-main);
+}
+
+.tab-btn.active-tab {
+    color: var(--text-main);
+    border-bottom: 2px solid var(--text-main);
+}
+
+/* Oprava zobrazení Quill panelu na tmavším pozadí webu */
+.ql-toolbar.ql-snow {
+    background: #f4f1e9;
+    border-color: #dfdcd2 !important;
+}
+.ql-container.ql-snow {
+    border-color: #dfdcd2 !important;
+}
