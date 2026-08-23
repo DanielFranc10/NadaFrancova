@@ -2,9 +2,9 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyq
 
 // --- NASTAVENÍ GITHUB (Pro ukládání obrázků) ---
 // Vygeneruj si Personal Access Token na GitHubu (s právem 'repo')
-const GITHUB_TOKEN = "SEM_VLOZ_SVUJ_GITHUB_TOKEN"; 
-const GITHUB_USER = "SEM_VLOZ_SVE_JMENO_NA_GITHUB"; 
-const GITHUB_REPO = "SEM_VLOZ_NAZEV_REPOZITARE"; 
+const GITHUB_TOKEN = "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"; 
+const GITHUB_USER = "DanielFranc10"; 
+const GITHUB_REPO = "blog-fotky"; 
 // -----------------------------------------------
 
 let quillEditor; // Globální proměnná pro editor
