@@ -1,95 +1,30 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
 
-let currentPage = 1;
-const blogsPerPage = 6;
+// --- NASTAVENÍ GITHUB (Pro ukládání obrázků) ---
+// Vygeneruj si Personal Access Token na GitHubu (s právem 'repo')
+const GITHUB_TOKEN = "SEM_VLOZ_SVUJ_GITHUB_TOKEN"; 
+const GITHUB_USER = "SEM_VLOZ_SVE_JMENO_NA_GITHUB"; 
+const GITHUB_REPO = "SEM_VLOZ_NAZEV_REPOZITARE"; 
+// -----------------------------------------------
 
+let quillEditor; // Globální proměnná pro editor
+
+// --- KOMUNIKACE S GOOGLE TABULKOU ---
 async function fetchBlogs() {
     try {
         const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
         return await response.json();
     } catch (err) {
-        console.error("Chyba při načítání:", err);
-        return [];
+        console.error("Chyba:", err); return [];
     }
 }
 
-async function renderBlogGrid(page = 1) {
-    currentPage = page;
-    const container = document.getElementById('dynamic-blog-grid');
-    const pagination = document.getElementById('pagination-container');
-    if (!container) return;
+// (Tady zůstávají beze změny funkce renderBlogGrid() a renderSingleArticle() z minula)
+// ... Ponech ty, co už máš pro vykreslení mřížky a detailu článku na webu ...
+async function renderBlogGrid() { /* tvůj kód */ }
+async function renderSingleArticle() { /* tvůj kód */ }
 
-    container.innerHTML = '<p style="grid-column: span 3; text-align: center;">Načítám data z databáze...</p>'; 
-    const blogs = await fetchBlogs();
-    container.innerHTML = ''; 
-
-    if (!blogs || blogs.length === 0) {
-        container.innerHTML = '<p style="grid-column: span 3; text-align: center;">Zatím nejsou publikovány žádné články.</p>';
-        if (pagination) pagination.innerHTML = '';
-        return;
-    }
-
-    const start = (currentPage - 1) * blogsPerPage;
-    const end = start + blogsPerPage;
-    const currentBlogs = blogs.slice(start, end);
-
-    currentBlogs.forEach((blog) => {
-        const article = document.createElement('article');
-        article.className = 'post-card';
-        article.innerHTML = `
-            <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
-            <p>${blog.excerpt}</p>
-            <time>${blog.date}</time>
-        `;
-        container.appendChild(article);
-    });
-
-    renderPagination(blogs.length);
-}
-
-function renderPagination(totalItems) {
-    const paginationContainer = document.getElementById('pagination-container');
-    if (!paginationContainer) return;
-    
-    paginationContainer.innerHTML = '';
-    const totalPages = Math.ceil(totalItems / blogsPerPage);
-    if (totalPages <= 1) return;
-
-    for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement('button');
-        btn.innerText = i;
-        btn.className = i === currentPage ? 'active' : '';
-        btn.onclick = () => renderBlogGrid(i);
-        paginationContainer.appendChild(btn);
-    }
-}
-
-async function renderSingleArticle() {
-    const container = document.getElementById('dynamic-article');
-    if (!container) return;
-
-    container.innerHTML = '<p>Otevírám článek...</p>';
-    const urlParams = new URLSearchParams(window.location.search);
-    const blogId = urlParams.get('id');
-    
-    const blogs = await fetchBlogs();
-    const blog = blogs.find(b => b.id.toString() === blogId.toString());
-
-    if (blog) {
-        document.title = `${blog.title} | Blog`;
-        let imageHtml = blog.image ? `<img src="${blog.image}" alt="${blog.title}" style="width:100%; max-height:400px; object-fit:cover; margin: 2rem 0; border-radius: 4px;">` : '';
-        
-        container.innerHTML = `
-            <h1>${blog.title}</h1>
-            <div class="meta">Napsal administrator / ${blog.date}</div>
-            ${imageHtml}
-            ${blog.content}
-        `;
-    } else {
-        container.innerHTML = `<h1>Článek nenalezen</h1><p>Tento článek neexistuje nebo byl stažen.</p><a href="blog.html">← Zpět na blog</a>`;
-    }
-}
-
+// --- ADMINISTRACE A ZÁLOŽKY ---
 function checkLogin() {
     const adminSection = document.getElementById('admin-dashboard');
     const loginSection = document.getElementById('login-screen');
@@ -98,6 +33,7 @@ function checkLogin() {
     if (sessionStorage.getItem('isLoggedIn') === 'true') {
         loginSection.style.display = 'none';
         adminSection.style.display = 'block';
+        initQuillEditor(); // Spustí editor
         renderAdminList();
     } else {
         loginSection.style.display = 'block';
@@ -106,74 +42,106 @@ function checkLogin() {
 }
 
 function login() {
-    const user = document.getElementById('admin-user').value;
-    const pass = document.getElementById('admin-pass').value;
-
-    if (user === 'francova' && pass === '654321') {
-        sessionStorage.setItem('isLoggedIn', 'true');
-        checkLogin();
-    } else {
-        alert('Špatné jméno nebo heslo!');
-    }
+    if (document.getElementById('admin-user').value === 'francova' && document.getElementById('admin-pass').value === '654321') {
+        sessionStorage.setItem('isLoggedIn', 'true'); checkLogin();
+    } else alert('Špatné jméno nebo heslo!');
 }
 
-function logout() {
-    sessionStorage.removeItem('isLoggedIn');
-    checkLogin();
+function logout() { sessionStorage.removeItem('isLoggedIn'); checkLogin(); }
+
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active-tab'));
+    
+    document.getElementById('tab-' + tabId).style.display = 'block';
+    event.target.classList.add('active-tab');
 }
 
-async function renderAdminList() {
-    const list = document.getElementById('admin-post-list');
-    if (!list) return;
+async function renderAdminList() { /* tvůj kód pro seznam a mazání z minula... */ }
+async function deleteBlog(event, id) { /* tvůj kód pro mazání z minula... */ }
 
-    list.innerHTML = '<li>Načítám data...</li>';
-    const blogs = await fetchBlogs();
-    list.innerHTML = '';
-
-    if (!blogs || blogs.length === 0) {
-        list.innerHTML = '<li>Tabulka je zatím prázdná.</li>';
-        return;
-    }
-
-    blogs.forEach(blog => {
-        const li = document.createElement('li');
-        li.className = 'admin-post-item';
-        li.innerHTML = `
-            <span>${blog.title}</span>
-            <button class="delete-btn" onclick="deleteBlog(event, '${blog.id}')">Smazat</button>
-        `;
-        list.appendChild(li);
+// --- INICIALIZACE EDITORU A NAHRÁVÁNÍ NA GITHUB ---
+function initQuillEditor() {
+    if(quillEditor) return; // Aby se nespustil dvakrát
+    
+    quillEditor = new Quill('#editor-container', {
+        theme: 'snow',
+        modules: {
+            toolbar: {
+                container: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'image'], // Tlačítko pro obrázek
+                    ['clean']
+                ],
+                handlers: {
+                    image: uploadImageToGitHub // Vlastní funkce pro obrázek
+                }
+            }
+        }
     });
 }
 
-async function deleteBlog(event, id) {
-    if(confirm("Smazat článek? Provede se okamžitě i v tabulce.")) {
-        const btn = event.target;
-        btn.innerText = "Mažu...";
-        btn.disabled = true;
+function uploadImageToGitHub() {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
 
-        try {
-            await fetch(API_URL + "?action=delete&id=" + id, { method: "POST", redirect: "follow" });
-            await renderAdminList(); 
-        } catch (err) {
-            alert("Chyba připojení k tabulce!");
-            btn.innerText = "Smazat";
-            btn.disabled = false;
-        }
-    }
+    input.onchange = async () => {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+            const base64Content = reader.result.split(',')[1];
+            const fileName = `img_${Date.now()}.png`; // Unikátní název
+            const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/blog-images/${fileName}`;
+
+            try {
+                alert("Nahrávám obrázek na GitHub, prosím čekej...");
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Nahrán obrázek do blogu: ${fileName}`,
+                        content: base64Content
+                    })
+                });
+
+                if (response.ok) {
+                    // Po úspěšném nahrání vygenerujeme Raw odkaz a vložíme do editoru
+                    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/blog-images/${fileName}`;
+                    const range = quillEditor.getSelection();
+                    quillEditor.insertEmbed(range.index, 'image', rawUrl);
+                } else {
+                    const errorData = await response.json();
+                    alert("Chyba GitHubu: " + errorData.message);
+                }
+            } catch (err) {
+                alert("Nepodařilo se připojit k GitHubu.");
+            }
+        };
+    };
 }
 
+// --- ODESLÁNÍ HOTOVÉHO ČLÁNKU DO GOOGLE TABULEK ---
 async function addNewBlog(event) {
     event.preventDefault();
-    const btn = event.target.querySelector('button[type="submit"]');
-    btn.innerText = "Odesílám...";
-    btn.disabled = true;
+    const btn = document.getElementById('publish-btn');
+    btn.innerText = "Odesílám do tabulky..."; btn.disabled = true;
 
     const title = document.getElementById('new-title').value;
     const date = document.getElementById('new-date').value;
     const excerpt = document.getElementById('new-excerpt').value;
-    const image = document.getElementById('new-image').value;
-    const content = document.getElementById('new-content').value;
+    
+    // Zde vytáhneme finální zformátovaný HTML kód z WordPress-like editoru
+    const contentHtml = quillEditor.root.innerHTML; 
 
     const dateObj = new Date(date);
     const months = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"];
@@ -184,8 +152,8 @@ async function addNewBlog(event) {
         title: title,
         date: formattedDate,
         excerpt: excerpt,
-        image: image,
-        content: content.replace(/\n/g, '<br>') 
+        image: "", 
+        content: contentHtml 
     };
 
     try {
@@ -197,18 +165,16 @@ async function addNewBlog(event) {
         });
         
         document.getElementById('add-blog-form').reset();
+        quillEditor.setContents([]); // Vyčistí editor
         await renderAdminList();
-        alert('Publikováno!');
+        alert('Článek z editoru byl úspěšně nahrán!');
     } catch (err) {
-        alert("Chyba.");
+        alert("Něco se pokazilo při odesílání.");
     }
-
-    btn.innerText = "Publikovat článek";
-    btn.disabled = false;
+    btn.innerText = "Publikovat článek"; btn.disabled = false;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    renderBlogGrid();
-    renderSingleArticle();
+    // (Zde si volej své renderBlogGrid atd.)
     checkLogin();
 });
