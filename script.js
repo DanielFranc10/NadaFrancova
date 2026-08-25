@@ -1,6 +1,7 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
 
-const GITHUB_TOKEN = "VLOZ_NOVY_TOKEN"; 
+// Bezpečnostní upozornění: Vlož nový klíč vygenerovaný v GitHubu
+const GITHUB_TOKEN = "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"; 
 const GITHUB_USER = "DanielFranc10"; 
 const GITHUB_REPO = "blog-fotky"; 
 
@@ -51,32 +52,6 @@ async function renderBlogGrid() {
     }
 }
 
-async function renderSingleArticle() {
-    const container = document.getElementById('dynamic-article');
-    if (!container) return;
-
-    container.innerHTML = '<p>Otevírám článek...</p>';
-    const urlParams = new URLSearchParams(window.location.search);
-    const blogId = urlParams.get('id');
-    
-    const blogs = await fetchBlogs();
-    const blog = blogs.find(b => b.id.toString() === blogId.toString());
-
-    if (blog) {
-        document.title = `${blog.title} | Blog`;
-        let imageHtml = blog.image ? `<img src="${blog.image}" alt="${blog.title}" style="width:100%; max-height:400px; object-fit:cover; margin: 2rem 0; border-radius: 4px;">` : '';
-        
-        container.innerHTML = `
-            <h1>${blog.title}</h1>
-            <div class="meta">Napsal administrator / ${blog.date}</div>
-            ${imageHtml}
-            ${blog.content}
-        `;
-    } else {
-        container.innerHTML = `<h1>Článek nenalezen</h1><p>Tento článek neexistuje nebo byl stažen.</p><a href="blog.html">← Zpět na blog</a>`;
-    }
-}
-
 function checkLogin() {
     const adminSection = document.getElementById('admin-dashboard');
     const loginSection = document.getElementById('login-screen');
@@ -96,7 +71,7 @@ function checkLogin() {
 function login() {
     if (document.getElementById('admin-user').value === 'francova' && document.getElementById('admin-pass').value === '654321') {
         sessionStorage.setItem('isLoggedIn', 'true'); checkLogin();
-    } else alert('Špatné jméno nebo heslo!');
+    } else alert('Špatné heslo!');
 }
 
 function logout() { sessionStorage.removeItem('isLoggedIn'); checkLogin(); }
@@ -104,7 +79,6 @@ function logout() { sessionStorage.removeItem('isLoggedIn'); checkLogin(); }
 function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active-tab'));
-    
     document.getElementById('tab-' + tabId).style.display = 'block';
     event.target.classList.add('active-tab');
 }
@@ -124,10 +98,10 @@ async function renderAdminList() {
 
     blogs.forEach(blog => {
         const li = document.createElement('li');
-        li.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px; margin-bottom: 5px; border-radius: 6px; border: 1px solid #cbd5e1;";
+        li.className = 'admin-list-item';
         li.innerHTML = `
             <span><strong>${blog.title}</strong> (${blog.date})</span>
-            <button class="delete-btn" onclick="deleteBlog(event, '${blog.id}')" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Smazat</button>
+            <button onclick="deleteBlog(event, '${blog.id}')">Smazat</button>
         `;
         list.appendChild(li);
     });
@@ -147,7 +121,6 @@ async function deleteBlog(event, id) {
 
 function initQuillEditor() {
     if(quillEditor) return; 
-    
     quillEditor = new Quill('#editor-container', {
         theme: 'snow',
         modules: {
@@ -159,9 +132,7 @@ function initQuillEditor() {
                     ['link', 'image'], 
                     ['clean']
                 ],
-                handlers: {
-                    image: uploadImageToGitHub 
-                }
+                handlers: { image: uploadImageToGitHub }
             }
         }
     });
@@ -170,7 +141,6 @@ function initQuillEditor() {
 function uploadImageToGitHub() {
     const range = quillEditor.getSelection(true);
     const index = range ? range.index : 0;
-
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'image/*');
@@ -189,29 +159,25 @@ function uploadImageToGitHub() {
             const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/blog-images/${fileName}`;
 
             try {
-                alert("Nahrávám obrázek na GitHub. Vyčkejte na dokončení.");
+                alert("Nahrávám obrázek na GitHub.");
                 const response = await fetch(url, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${GITHUB_TOKEN}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        message: `Upload obrázku: ${fileName}`,
-                        content: base64Content
-                    })
+                    body: JSON.stringify({ message: `Upload obrázku: ${fileName}`, content: base64Content })
                 });
-
-                const data = await response.json();
 
                 if (response.ok) {
                     const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/blog-images/${fileName}`;
                     quillEditor.insertEmbed(index, 'image', rawUrl);
                 } else {
+                    const data = await response.json();
                     alert("Chyba GitHubu: " + data.message);
                 }
             } catch (err) {
-                alert("Nepodařilo se připojit k GitHub API.");
+                alert("Chyba API spojení.");
             }
         };
     };
@@ -241,41 +207,18 @@ async function addNewBlog(event) {
     };
 
     try {
-        await fetch(API_URL + "?action=add", {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            redirect: "follow",
-            body: JSON.stringify(newBlog)
-        });
-        
+        await fetch(API_URL + "?action=add", { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow", body: JSON.stringify(newBlog) });
         document.getElementById('add-blog-form').reset();
         quillEditor.setContents([]); 
         await renderAdminList();
-        alert('Článek byl nahrán do databáze.');
+        alert('Článek publikován.');
     } catch (err) {
-        alert("Chyba při odesílání do Google Tabulky.");
+        alert("Chyba při odesílání do Tabulky.");
     }
     btn.innerText = "Publikovat článek"; btn.disabled = false;
 }
 
-window.seedDatabase = async function() {
-    const originalBlogs = [
-        { id: "1", title: "Vyplatí se nyní počkat na novelu stavebního zákona, nebo raději spěchat?", date: "28 května, 2026", excerpt: "Nový stavební zákon, který v základu platí od července 2024, čeká další velká revize...", image: "", content: "<p>Ačkoliv se v kuloárech mluví o zjednodušení, realita z pohledu běžného člověka je jiná.</p>" },
-        { id: "2", title: "Dodatečné povolení stavby: Proč se nevyplatí čekat na výzvu z úřadu?", date: "18 dubna, 2026", excerpt: "Mnoho lidí žije v domnění, že pokud na svém pozemku postavili „jen“ kůlnu...", image: "", content: "<p>Mnoho lidí žije v domnění, že pokud na svém pozemku postavili „jen“ kůlnu, nic se neděje.</p>" },
-        { id: "3", title: "Co přináší norma EN 17210?", date: "16 května, 2026", excerpt: "Když se řekne „bezbariérový přístup“, většina lidí si možná představí rampu...", image: "", content: "<p>Přístupnost se týká celé populace – například maminek s kočárky, lidí s dočasným zraněním.</p>" },
-        { id: "4", title: "Bali – chrámová architektura (2)", date: "11 dubna, 2026", excerpt: "Balijská krajina je protkána tisíci chrámy, které tvoří duchovní kostru ostrova...", image: "", content: "<p>Balijská krajina je protkána tisíci chrámy, které tvoří duchovní kostru ostrova.</p>" },
-        { id: "5", title: "Cesta k úspornému bydlení", date: "9 května, 2026", excerpt: "Způsob, jakým realizujeme stavby nejen pro bydlení, se za poslední čtyři desetiletí proměnil k nepoznání.", image: "", content: "<p>Způsob, jakým realizujeme stavby nejen pro bydlení, se za poslední čtyři desetiletí proměnil.</p>" },
-        { id: "6", title: "13. novelizace stavebního zákona 2026", date: "23 dubna, 2026", excerpt: "Tento článek se zaměřuje na kritické srovnání nové podoby stavebního práva...", image: "", content: "<p>Tento článek se zaměřuje na kritické srovnání nové podoby stavebního práva.</p>" }
-    ];
-
-    for (let blog of originalBlogs) {
-        await fetch(API_URL + "?action=add", { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow", body: JSON.stringify(blog) });
-    }
-    alert("Původní články byly obnoveny. Obnov stránku.");
-};
-
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('dynamic-blog-grid')) renderBlogGrid();
-    if (document.getElementById('dynamic-article')) renderSingleArticle();
     checkLogin();
 });
