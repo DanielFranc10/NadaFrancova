@@ -1,7 +1,5 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
-
-// Bezpečnostní upozornění: Vlož nový klíč vygenerovaný v GitHubu
-const GITHUB_TOKEN = "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"; 
+const GITHUB_TOKEN = "VLOZ_NOVY_KLIC"; 
 const GITHUB_USER = "DanielFranc10"; 
 const GITHUB_REPO = "blog-fotky"; 
 
@@ -20,23 +18,16 @@ async function renderBlogGrid() {
     const container = document.getElementById('dynamic-blog-grid');
     if (!container) return;
 
-    container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Načítám data z databáze...</p>'; 
+    container.innerHTML = '<p style="grid-column: span 4;">Načítám data z databáze...</p>'; 
     const blogs = await fetchBlogs();
     container.innerHTML = ''; 
 
     if (!blogs || blogs.length === 0) {
-        container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Na webu zatím nejsou publikovány žádné články.</p>';
+        container.innerHTML = '<p style="grid-column: span 4;">Na webu zatím nejsou publikovány žádné články.</p>';
         return;
     }
 
-    let currentColumn = document.createElement('div');
-    
-    blogs.forEach((blog, index) => {
-        if (index > 0 && index % 2 === 0) {
-            container.appendChild(currentColumn);
-            currentColumn = document.createElement('div');
-        }
-
+    blogs.forEach((blog) => {
         const article = document.createElement('article');
         article.className = 'post-card';
         article.innerHTML = `
@@ -44,11 +35,33 @@ async function renderBlogGrid() {
             <p>${blog.excerpt}</p>
             <time>${blog.date}</time>
         `;
-        currentColumn.appendChild(article);
+        container.appendChild(article);
     });
+}
+
+async function renderSingleArticle() {
+    const container = document.getElementById('dynamic-article');
+    if (!container) return;
+
+    container.innerHTML = '<p>Otevírám článek...</p>';
+    const urlParams = new URLSearchParams(window.location.search);
+    const blogId = urlParams.get('id');
     
-    if (currentColumn.hasChildNodes()) {
-        container.appendChild(currentColumn);
+    const blogs = await fetchBlogs();
+    const blog = blogs.find(b => b.id.toString() === blogId.toString());
+
+    if (blog) {
+        document.title = `${blog.title} | Blog`;
+        let imageHtml = blog.image ? `<img src="${blog.image}" alt="${blog.title}" style="width:100%; max-height:400px; object-fit:cover; margin: 2rem 0; border-radius: 4px;">` : '';
+        
+        container.innerHTML = `
+            <h1>${blog.title}</h1>
+            <div class="meta">Napsal administrator / ${blog.date}</div>
+            ${imageHtml}
+            ${blog.content}
+        `;
+    } else {
+        container.innerHTML = `<h1>Článek nenalezen</h1><p>Tento článek neexistuje nebo byl stažen.</p><a href="blog.html">← Zpět na blog</a>`;
     }
 }
 
@@ -220,5 +233,6 @@ async function addNewBlog(event) {
 
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('dynamic-blog-grid')) renderBlogGrid();
+    if (document.getElementById('dynamic-article')) renderSingleArticle();
     checkLogin();
 });
