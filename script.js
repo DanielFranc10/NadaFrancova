@@ -1,5 +1,7 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
-const GITHUB_TOKEN = "VLOZ_NOVY_KLIC"; 
+
+// Vlož svůj nový GitHub token
+const GITHUB_TOKEN = "VLOZ_NOVY_TOKEN"; 
 const GITHUB_USER = "DanielFranc10"; 
 const GITHUB_REPO = "blog-fotky"; 
 
@@ -18,19 +20,35 @@ async function renderBlogGrid() {
     const container = document.getElementById('dynamic-blog-grid');
     if (!container) return;
 
-    container.innerHTML = '<p style="grid-column: span 4;">Načítám data z databáze...</p>'; 
+    container.innerHTML = '<p style="grid-column: span 3; text-align: center;">Načítám články...</p>'; 
     const blogs = await fetchBlogs();
     container.innerHTML = ''; 
 
     if (!blogs || blogs.length === 0) {
-        container.innerHTML = '<p style="grid-column: span 4;">Na webu zatím nejsou publikovány žádné články.</p>';
+        container.innerHTML = '<p style="grid-column: span 3; text-align: center;">Zatím nejsou publikovány žádné články.</p>';
         return;
     }
 
-    blogs.forEach((blog) => {
+    // Pokud jsme na úvodní straně, zobrazíme max 6 článků (3x2), jinak všechny
+    const isHomePage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
+    const displayBlogs = isHomePage ? blogs.slice(0, 6) : blogs;
+
+    displayBlogs.forEach((blog) => {
+        // Extrakce první fotky z textu pro kartičku
+        let coverImg = "";
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = blog.content;
+        const firstImg = tempDiv.querySelector('img');
+        if (firstImg) {
+            coverImg = firstImg.src;
+        }
+        
+        const imageHtml = coverImg ? `<img src="${coverImg}" class="blog-card-img" alt="${blog.title}">` : '';
+
         const article = document.createElement('article');
         article.className = 'post-card';
         article.innerHTML = `
+            ${imageHtml}
             <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
             <p>${blog.excerpt}</p>
             <time>${blog.date}</time>
@@ -52,12 +70,10 @@ async function renderSingleArticle() {
 
     if (blog) {
         document.title = `${blog.title} | Blog`;
-        let imageHtml = blog.image ? `<img src="${blog.image}" alt="${blog.title}" style="width:100%; max-height:400px; object-fit:cover; margin: 2rem 0; border-radius: 4px;">` : '';
         
         container.innerHTML = `
             <h1>${blog.title}</h1>
             <div class="meta">Napsal administrator / ${blog.date}</div>
-            ${imageHtml}
             ${blog.content}
         `;
     } else {
