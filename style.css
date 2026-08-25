@@ -129,52 +129,7 @@ body {
     letter-spacing: 1px;
 }
 
-/* --- DESIGN KARTIČEK PRO HOME (INDEX) - 4 SLOUPCE BEZ FOTEK --- */
-.four-col-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 40px;
-}
-
-.index-post-card {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.index-post-card h3 {
-    margin: 0 0 15px 0;
-    font-size: 1.1rem;
-    line-height: 1.4;
-}
-
-.index-post-card h3 a {
-    color: var(--text-main);
-    text-decoration: none;
-    border-bottom: 2px solid var(--text-main);
-    padding-bottom: 3px;
-    font-weight: 700;
-    transition: opacity 0.2s;
-}
-
-.index-post-card h3 a:hover {
-    opacity: 0.7;
-}
-
-.index-post-card p {
-    font-size: 0.95rem;
-    line-height: 1.6;
-    margin: 0 0 20px 0;
-    color: var(--text-main);
-    flex-grow: 1;
-}
-
-.index-post-card time {
-    font-size: 0.9rem;
-    color: var(--text-main);
-}
-
-/* --- DESIGN KARTIČEK PRO BLOG STRÁNKU - 3 SLOUPCE S FOTKAMI --- */
+/* --- BLOG MŘÍŽKA --- */
 .three-col-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -182,55 +137,75 @@ body {
     margin-bottom: 60px;
 }
 
-.blog-page-card {
+/* Blokový design kartičky s blogem */
+.post-card {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    background: #ffffff;
+    border: 1px solid var(--line-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.06);
 }
 
 .blog-card-img {
     width: 100%;
-    height: 220px;
+    height: 240px;
     object-fit: cover;
-    margin-bottom: 20px;
+    display: block;
+    background: var(--bg-outer);
+    border-bottom: 1px solid var(--line-color);
+}
+
+.post-card-content {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .blog-category {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 700;
+    text-transform: uppercase;
     color: var(--text-muted);
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
-.blog-page-card h3 {
+.post-card-content h3 {
     margin: 0 0 15px 0;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     line-height: 1.4;
 }
 
-.blog-page-card h3 a {
+.post-card-content h3 a {
     color: var(--text-main);
     text-decoration: none;
-    font-weight: 700;
     transition: opacity 0.2s;
 }
 
-.blog-page-card h3 a:hover {
+.post-card-content h3 a:hover {
     opacity: 0.7;
 }
 
 .blog-meta {
     font-size: 0.85rem;
-    color: var(--text-main);
+    color: var(--text-muted);
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
-.blog-page-card p {
-    font-size: 1rem;
+.post-card-content p {
+    font-size: 0.95rem;
     line-height: 1.6;
     margin: 0;
-    color: var(--text-muted);
+    color: var(--text-main);
 }
 
 /* --- OBSAHOVÉ STRÁNKY --- */
@@ -419,6 +394,6 @@ footer {
     .hero { flex-direction: column; }
     .hero-image { order: -1; }
     .icon-nav-container { grid-template-columns: repeat(2, 1fr); gap: 30px 15px;}
-    .four-col-grid, .three-col-grid { grid-template-columns: 1fr; }
+    .three-col-grid { grid-template-columns: 1fr; }
     .content-wrapper { padding: 30px 20px; }
 }
