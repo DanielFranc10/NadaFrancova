@@ -3,7 +3,7 @@
 :root {
     --bg-outer: #e6e2d3;
     --bg-inner: #f2efe4;
-    --bg-block: #ebe8dc; /* Barva odděleného bloku */
+    --bg-block: #ebe8dc;
     --text-main: #33322e;
     --text-muted: #5a5753;
     --line-color: #dfdcd2;
@@ -43,7 +43,7 @@ body {
     font-size: 1.1rem;
 }
 
-/* --- HERO SEKCE (Jen na úvodní straně) --- */
+/* --- HERO SEKCE --- */
 .hero {
     display: flex;
     align-items: flex-start;
@@ -86,12 +86,11 @@ body {
     filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.15)) sepia(0.3);
 }
 
-/* --- ODDĚLENÝ BLOK (Ikony a Blog na úvodní straně) --- */
 .content-wrapper {
     background-color: var(--bg-block);
     border-radius: 12px;
     padding: 50px 40px;
-    margin: 0 -20px; /* Rozšíření bloku jemně do stran */
+    margin: 0 -20px; 
 }
 
 /* --- IKONOVÁ NAVIGACE --- */
@@ -130,40 +129,26 @@ body {
     letter-spacing: 1px;
 }
 
-/* --- BLOG MŘÍŽKA (3 sloupce) --- */
-.three-col-grid {
+/* --- DESIGN KARTIČEK PRO HOME (INDEX) - 4 SLOUPCE BEZ FOTEK --- */
+.four-col-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 40px;
 }
 
-.post-card {
+.index-post-card {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--line-color);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
 }
 
-.blog-card-img {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-    border-radius: 4px;
-    margin-bottom: 20px;
-    background: var(--bg-outer);
-}
-
-.post-card h3 {
+.index-post-card h3 {
     margin: 0 0 15px 0;
     font-size: 1.1rem;
     line-height: 1.4;
 }
 
-.post-card h3 a {
+.index-post-card h3 a {
     color: var(--text-main);
     text-decoration: none;
     border-bottom: 2px solid var(--text-main);
@@ -172,11 +157,11 @@ body {
     transition: opacity 0.2s;
 }
 
-.post-card h3 a:hover {
+.index-post-card h3 a:hover {
     opacity: 0.7;
 }
 
-.post-card p {
+.index-post-card p {
     font-size: 0.95rem;
     line-height: 1.6;
     margin: 0 0 20px 0;
@@ -184,8 +169,67 @@ body {
     flex-grow: 1;
 }
 
-.post-card time {
+.index-post-card time {
     font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+/* --- DESIGN KARTIČEK PRO BLOG STRÁNKU - 3 SLOUPCE S FOTKAMI --- */
+.three-col-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-bottom: 60px;
+}
+
+.blog-page-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.blog-card-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    margin-bottom: 20px;
+}
+
+.blog-category {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 15px;
+}
+
+.blog-page-card h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.4rem;
+    line-height: 1.4;
+}
+
+.blog-page-card h3 a {
+    color: var(--text-main);
+    text-decoration: none;
+    font-weight: 700;
+    transition: opacity 0.2s;
+}
+
+.blog-page-card h3 a:hover {
+    opacity: 0.7;
+}
+
+.blog-meta {
+    font-size: 0.85rem;
+    color: var(--text-main);
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.blog-page-card p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
     color: var(--text-muted);
 }
 
@@ -375,6 +419,6 @@ footer {
     .hero { flex-direction: column; }
     .hero-image { order: -1; }
     .icon-nav-container { grid-template-columns: repeat(2, 1fr); gap: 30px 15px;}
-    .three-col-grid { grid-template-columns: 1fr; }
+    .four-col-grid, .three-col-grid { grid-template-columns: 1fr; }
     .content-wrapper { padding: 30px 20px; }
 }
