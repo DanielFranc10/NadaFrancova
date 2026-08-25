@@ -1,7 +1,7 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
 
 // Vlož svůj nový GitHub token
-const GITHUB_TOKEN = "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"; 
+const GITHUB_TOKEN = "VLOZ_NOVY_TOKEN"; 
 const GITHUB_USER = "DanielFranc10"; 
 const GITHUB_REPO = "blog-fotky"; 
 
@@ -29,50 +29,37 @@ async function renderBlogGrid() {
         return;
     }
 
-    const isHomePage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
+    // Limit zobrazení na max 6 článků
+    const displayBlogs = blogs.slice(0, 6);
+    
+    // Grid pro obě stránky je 3-sloupcový (viz CSS .three-col-grid)
+    container.className = 'three-col-grid';
 
-    if (isHomePage) {
-        // HOME PAGE: 4 sloupce, bez obrázků, podtržené nadpisy
-        container.className = 'four-col-grid';
-        const displayBlogs = blogs.slice(0, 4); // Max 4 na hlavní stránce
-        
-        displayBlogs.forEach((blog) => {
-            const article = document.createElement('article');
-            article.className = 'index-post-card';
-            article.innerHTML = `
-                <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
-                <p>${blog.excerpt}</p>
-                <time>${blog.date}</time>
-            `;
-            container.appendChild(article);
-        });
-    } else {
-        // BLOG PAGE: 3 sloupce, s obrázky, kategorie a autor
-        container.className = 'three-col-grid';
-        
-        blogs.forEach((blog) => {
-            let coverImg = "";
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = blog.content;
-            const firstImg = tempDiv.querySelector('img');
-            if (firstImg) {
-                coverImg = firstImg.src;
-            }
-            
-            const imageHtml = coverImg ? `<img src="${coverImg}" class="blog-card-img" alt="${blog.title}">` : '';
+    displayBlogs.forEach((blog) => {
+        // Hledání obrázku v textu. Pokud žádný není, použijeme defaultní
+        let coverImg = "nahled.png";
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = blog.content;
+        const firstImg = tempDiv.querySelector('img');
+        if (firstImg) {
+            coverImg = firstImg.src;
+        }
 
-            const article = document.createElement('article');
-            article.className = 'blog-page-card';
-            article.innerHTML = `
-                ${imageHtml}
+        const article = document.createElement('article');
+        article.className = 'post-card';
+        article.innerHTML = `
+            <a href="clanek.html?id=${blog.id}">
+                <img src="${coverImg}" class="blog-card-img" alt="${blog.title}">
+            </a>
+            <div class="post-card-content">
                 <div class="blog-category">Uncategorized</div>
                 <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
                 <div class="blog-meta">administrator / ${blog.date}</div>
                 <p>${blog.excerpt}</p>
-            `;
-            container.appendChild(article);
-        });
-    }
+            </div>
+        `;
+        container.appendChild(article);
+    });
 }
 
 async function renderSingleArticle() {
