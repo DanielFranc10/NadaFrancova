@@ -3,6 +3,7 @@
 :root {
     --bg-outer: #e6e2d3;
     --bg-inner: #f2efe4;
+    --bg-block: #ebe8dc; /* Barva odděleného bloku */
     --text-main: #33322e;
     --text-muted: #5a5753;
     --line-color: #dfdcd2;
@@ -32,7 +33,7 @@ body {
 .top-header {
     border-bottom: 1px solid var(--line-color);
     padding-bottom: 20px;
-    margin-bottom: 60px;
+    margin-bottom: 50px;
 }
 
 .top-header a {
@@ -42,12 +43,13 @@ body {
     font-size: 1.1rem;
 }
 
+/* --- HERO SEKCE (Jen na úvodní straně) --- */
 .hero {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 40px;
-    margin-bottom: 80px;
+    margin-bottom: 50px;
 }
 
 .hero-text {
@@ -78,10 +80,21 @@ body {
 
 .hero-image img {
     max-width: 100%;
+    width: 100%;
     height: auto;
+    display: block !important;
     filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.15)) sepia(0.3);
 }
 
+/* --- ODDĚLENÝ BLOK (Ikony a Blog na úvodní straně) --- */
+.content-wrapper {
+    background-color: var(--bg-block);
+    border-radius: 12px;
+    padding: 50px 40px;
+    margin: 0 -20px; /* Rozšíření bloku jemně do stran */
+}
+
+/* --- IKONOVÁ NAVIGACE --- */
 .icon-nav-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -117,17 +130,31 @@ body {
     letter-spacing: 1px;
 }
 
-.four-col-grid {
+/* --- BLOG MŘÍŽKA (3 sloupce) --- */
+.three-col-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 40px;
-    margin-bottom: 60px;
 }
 
 .post-card {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--line-color);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+}
+
+.blog-card-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    background: var(--bg-outer);
 }
 
 .post-card h3 {
@@ -162,6 +189,7 @@ body {
     color: var(--text-muted);
 }
 
+/* --- OBSAHOVÉ STRÁNKY --- */
 .page-text {
     line-height: 1.8;
     font-size: 1rem;
@@ -182,6 +210,7 @@ body {
 #dynamic-article {
     line-height: 1.8;
     margin-bottom: 60px;
+    max-width: 800px;
 }
 
 #dynamic-article h1 {
@@ -193,6 +222,13 @@ body {
     color: var(--text-muted);
     font-weight: 600;
     margin-bottom: 30px;
+}
+
+#dynamic-article img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 20px 0;
 }
 
 footer {
@@ -210,6 +246,7 @@ footer {
     cursor: text;
 }
 
+/* --- ADMINISTRACE --- */
 .login-box {
     max-width: 400px;
     margin: 4rem auto;
@@ -336,6 +373,8 @@ footer {
 @media (max-width: 900px) {
     .container { padding: 30px 20px; }
     .hero { flex-direction: column; }
-    .icon-nav-container { grid-template-columns: repeat(2, 1fr); }
-    .four-col-grid { grid-template-columns: 1fr; }
+    .hero-image { order: -1; }
+    .icon-nav-container { grid-template-columns: repeat(2, 1fr); gap: 30px 15px;}
+    .three-col-grid { grid-template-columns: 1fr; }
+    .content-wrapper { padding: 30px 20px; }
 }
