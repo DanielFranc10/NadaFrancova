@@ -1,7 +1,7 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
 
 // Vlož svůj nový GitHub token
-const GITHUB_TOKEN = "VLOZ_NOVY_TOKEN"; 
+const GITHUB_TOKEN = "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"; 
 const GITHUB_USER = "DanielFranc10"; 
 const GITHUB_REPO = "blog-fotky"; 
 
