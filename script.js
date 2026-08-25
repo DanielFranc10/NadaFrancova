@@ -20,41 +20,59 @@ async function renderBlogGrid() {
     const container = document.getElementById('dynamic-blog-grid');
     if (!container) return;
 
-    container.innerHTML = '<p style="grid-column: span 3; text-align: center;">Načítám články...</p>'; 
+    container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Načítám články...</p>'; 
     const blogs = await fetchBlogs();
     container.innerHTML = ''; 
 
     if (!blogs || blogs.length === 0) {
-        container.innerHTML = '<p style="grid-column: span 3; text-align: center;">Zatím nejsou publikovány žádné články.</p>';
+        container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Zatím nejsou publikovány žádné články.</p>';
         return;
     }
 
-    // Pokud jsme na úvodní straně, zobrazíme max 6 článků (3x2), jinak všechny
     const isHomePage = window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '';
-    const displayBlogs = isHomePage ? blogs.slice(0, 6) : blogs;
 
-    displayBlogs.forEach((blog) => {
-        // Extrakce první fotky z textu pro kartičku
-        let coverImg = "";
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = blog.content;
-        const firstImg = tempDiv.querySelector('img');
-        if (firstImg) {
-            coverImg = firstImg.src;
-        }
+    if (isHomePage) {
+        // HOME PAGE: 4 sloupce, bez obrázků, podtržené nadpisy
+        container.className = 'four-col-grid';
+        const displayBlogs = blogs.slice(0, 4); // Max 4 na hlavní stránce
         
-        const imageHtml = coverImg ? `<img src="${coverImg}" class="blog-card-img" alt="${blog.title}">` : '';
+        displayBlogs.forEach((blog) => {
+            const article = document.createElement('article');
+            article.className = 'index-post-card';
+            article.innerHTML = `
+                <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
+                <p>${blog.excerpt}</p>
+                <time>${blog.date}</time>
+            `;
+            container.appendChild(article);
+        });
+    } else {
+        // BLOG PAGE: 3 sloupce, s obrázky, kategorie a autor
+        container.className = 'three-col-grid';
+        
+        blogs.forEach((blog) => {
+            let coverImg = "";
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = blog.content;
+            const firstImg = tempDiv.querySelector('img');
+            if (firstImg) {
+                coverImg = firstImg.src;
+            }
+            
+            const imageHtml = coverImg ? `<img src="${coverImg}" class="blog-card-img" alt="${blog.title}">` : '';
 
-        const article = document.createElement('article');
-        article.className = 'post-card';
-        article.innerHTML = `
-            ${imageHtml}
-            <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
-            <p>${blog.excerpt}</p>
-            <time>${blog.date}</time>
-        `;
-        container.appendChild(article);
-    });
+            const article = document.createElement('article');
+            article.className = 'blog-page-card';
+            article.innerHTML = `
+                ${imageHtml}
+                <div class="blog-category">Uncategorized</div>
+                <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
+                <div class="blog-meta">administrator / ${blog.date}</div>
+                <p>${blog.excerpt}</p>
+            `;
+            container.appendChild(article);
+        });
+    }
 }
 
 async function renderSingleArticle() {
