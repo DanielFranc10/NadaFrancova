@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.createElement('div');
         overlay.id = 'maintenance-overlay';
         overlay.innerHTML = `
-            <div style="position:fixed; inset:0; width:100vw; height:100vh; background:#f3efe6; z-index:2147483647; display:flex; flex-direction:column; justify-content:center; align-items:center; font-family:Montserrat, sans-serif; color:#33322e; text-align:center;">
+            <div style="position:fixed; inset:0; width:100vw; height:100vh; background:#f2efe4; z-index:2147483647; display:flex; flex-direction:column; justify-content:center; align-items:center; font-family:Montserrat, sans-serif; color:#33322e; text-align:center;">
                 <h1 id="dev-unlock" style="font-size:2.5rem; margin-bottom:10px; user-select:none;">Omlouváme se za strpení</h1>
                 <p style="font-size:1.2rem;">Na stránce se aktivně pracuje.</p>
             </div>
