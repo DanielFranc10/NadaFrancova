@@ -7,6 +7,82 @@ const blogsPerPage = 6;
 
 const DEFAULT_BLOGS = [
     {
+        id: "2026052801",
+        title: "Vyplatí se nyní povolovat stavbu nebo počkat na novelu?",
+        date: "28 května, 2026",
+        excerpt: "Nový stavební zákon přináší poměrně zásadní zpřísnění pravidel pro drobné a jednoduché stavby na soukromých pozemcích...",
+        content: `<h2>Na co se vyplatí počkat? Velkorysejší limity pro zahradní stavby</h2>
+        <p>Nejvýraznější rozdíl mezi současným stavem a chystanou novelou pocítí lidé, kteří chtějí na zahradě stavět kůlnu, dílnu nebo doplňkový objekt k rodinnému domu. Dnešní realita je taková, že bez jakéhokoliv povolení můžete u domu postavit doplňkovou stavbu pouze do 40 m² zastavěné plochy. Chystaná novela posouvá plošný limit až na 60 m² zastavěné plochy a nově se k jednomu nadzemnímu podlaží výslovně povoluje i podkroví.</p>
+        <p><strong>Praktický dopad:</strong> Pokud plánujete stavbu většího zahradního domku s podkrovím, dnes byste museli projít povolením. V tomto případě se jednoznačně vyplatí s realizací počkat.</p>
+        <h2>Zavádí se striktní digitální podání</h2>
+        <p>Pokud je součástí podání dokumentace pro povolení rodinného domu, bude muset jít výhradně digitálně přes Portál stavebníka. Pokud nejste technicky zdatní a chcete si dokumentaci na úřad donést v deskách, podávejte žádost hned.</p>`
+    },
+    {
+        id: "2026051601",
+        title: "Když se řekne bezbariérový přístup...",
+        date: "16 května, 2026",
+        excerpt: "Když se řekne bezbariérový přístup, většina lidí si možná představí rampu pro vozíčkáře. Tento pojem toho ale obsáhne mnohem více...",
+        content: `<p>Když se řekne bezbariérový přístup, většina lidí si možná představí rampu pro vozíčkáře. Tento pojem toho ale obsáhne mnohem více. Pojďme se podívat, jak se jím zabývá evropská norma EN 17210.</p>
+        <h2>Flexibilita místo zkostnatělosti</h2>
+        <p>Doposud se přístupnost staveb řešila tak, že v zákoně bylo napsáno, že rampa musí mít sklon XY. Nový systém převzal evropskou normu EN 17210. To znamená, že zákon pouze říká: Stavba musí být přístupná a konkrétní detaily se převezmou z norem, které neustále aktualizují špičkoví odborníci.</p>
+        <h2>Design pro všechny (Design for All)</h2>
+        <p>Starý přístup dělal z přístupnosti něco navíc. Nová norma prosazuje, aby se vše již od začátku navrhovalo tak, aby to mohl pohodlně používat úplně každý. Představte si automatické otevírání dveří v supermarketu – dnes to oceníme všichni, když jdeme s plnými taškami. Přesně takto se mají nově navrhovat i veřejné prostory.</p>`
+    },
+    {
+        id: "2026050901",
+        title: "Evoluce zateplování: Od HERAKLITU k hi-tech izolacím",
+        date: "9 května, 2026",
+        excerpt: "Způsob, jakým realizujeme stavby, se za poslední desetiletí proměnil k nepoznání...",
+        content: `<h2>Pohled do historie</h2>
+        <p>Materiály, které dnes působí jako technologický pravěk, přesto tvořily základ našeho nízkoenergetického snažení. Mezi první izolanty patřil heraklit, dřevovláknitá deska s cementovým pojivem. Spolu s materiály se dramaticky zvětšily i tloušťky izolantů. V 50. letech se zateplovalo pětkou nebo osmičkou polystyrenu, což dnes působí úsměvně.</p>
+        <h2>Tepelná technika a komfort uvnitř domů</h2>
+        <p>Změna součinitele prostupu tepla (U) je fascinující. Pokud srovnáme stav z roku 1980 s dnešním standardem, zjistíme, že tehdejší konstrukce propouštěla zhruba pětkrát více tepla.</p>
+        <h2>Trendy do budoucna: Co nás čeká?</h2>
+        <p><strong>Uhlíková neutralita:</strong> Nebude se řešit jen to, kolik energie dům spotřebuje, ale kolik emisí CO2 vzniklo při výrobě samotných izolací.</p>
+        <p><strong>Ochrana proti přehřívání:</strong> S postupující klimatickou změnou se těžiště norem přesouvá ze zimního vytápění na letní chlazení. Požadavky na stínění budou přísnější.</p>`
+    },
+    {
+        id: "2026042301",
+        title: "13. novelizace a černé stavby",
+        date: "23 dubna, 2026",
+        excerpt: "Tento článek se zaměřuje na kritické srovnání nové podoby stavebního práva s důrazem na dopady 13. novelizace...",
+        content: `<h2>Legislativní zmatek a poslanecký bypass</h2>
+        <p>Stávající stavební zákon provází neustálá řada změn, avšak 13. novelizace je označována jako bezprecedentní. Na rozdíl od běžného legislativního procesu nevzešla z vládní dílny, ale formou poslaneckého návrhu.</p>
+        <h2>Drobné stavby a garáže</h2>
+        <p>Významnou kapitolou jsou drobné stavby, které novela vyjímá z nutnosti jakéhokoliv povolování. Do této kategorie nově spadají stavby do 40 m² zastavěné plochy a do 5 m výšky, pokud splňují podmínky umístění na pozemku rodinného domu.</p>
+        <h2>Digitalizace: Systém bez jistot</h2>
+        <p>Ačkoliv se mluví o jednom portálu, realita se komplikuje zaváděním nových typů dokumentací a procesů, k nimž chybí jasná metodika. Portál stavebníka je často nepřehledný a budí spíše rozpaky.</p>`
+    },
+    {
+        id: "2026041801",
+        title: "Černé stavby a dodatečné povolení",
+        date: "18 dubna, 2026",
+        excerpt: "Mnoho lidí žije v domnění, že pokud na svém pozemku postaví kůlnu, garáž nebo pergolu bez papírů, nic se neděje. Opak je pravdou...",
+        content: `<h2>Rizika černých staveb</h2>
+        <p>Stavební úřady dnes pravidelně porovnávají skutečnost s katastrem nemovitostí za pomoci ortofotomap a leteckých snímků. Pokud zjistí nesoulad, zahájí řízení o odstranění stavby.</p>
+        <p><strong>Nepovolený sjezd:</strong> Připojení pozemku na komunikaci podléhá schválení. Nelegální sjezd může být bezpečnostním rizikem, i když si myslíte, že vás opravňuje k dlouhodobému využívání.</p>
+        <h2>Kdy přijde výzva k odstranění stavby</h2>
+        <p>Když úřad zjistí černou stavbu, nařídí řízení o odstranění. Vy sice máte právo požádat o její dodatečné povolení, ale lhůta pro doložení všech podkladů je velmi omezená. Sehnání projektanta, který vypracuje dokumentaci skutečného provedení, je navíc pod časovým tlakem téměř nemožné.</p>
+        <h2>Co obnáší dodatečné povolení</h2>
+        <p>Dodatečné povolení není jen o výkresech. Musíte splnit stejné podmínky jako u nové stavby, což zahrnuje stanoviska dotčených orgánů (hasiči, hygiena) a zajištění vsakování srážkových vod na vlastním pozemku.</p>`
+    },
+    {
+        id: "2026041101",
+        title: "Bali - chrámy a rituály",
+        date: "11 dubna, 2026",
+        excerpt: "Balijská krajina je protkána chrámy, které tvoří duchovní osu ostrova. Podíváme se na to, jak je organizována celá komunita...",
+        content: `<h2>Kahyangan Tiga - pilíře balijské vesnice</h2>
+        <p>Základem balijské vesnice je duchovní ukotvení systémem tří chrámů, souhrnně nazývaných Kahyangan Tiga. Tento systém zavedl v 11. století mudrc Mpu Kuturan a jeho účelem je sjednotit věřící a zajistit harmonii bohů, lidí a předků.</p>
+        <h3>Pura Puseh (Chrám původu)</h3>
+        <p>Je zasvěcen bohu Višnuovi a zakladatelům vesnice. Nachází se v nejčistší části vesnice směrem k horám (Kaja).</p>
+        <h3>Pura Desa (Chrám vesnice)</h3>
+        <p>Hlavní chrám zasvěcený bohu Brahmovi. Stojí uprostřed vesnice v neutrální zóně a představuje trup vesnice.</p>
+        <h3>Pura Dalem (Chrám mrtvých)</h3>
+        <p>Zasvěcen bohu Šivovi nebo bohyni Durgě. V jeho blízkosti se vždy nachází hřbitov a kreační místa. Nachází se v nejnižší části vesnice směrem k moři (Kelod).</p>
+        <h2>Architektura a vstup do posvátna</h2>
+        <p>Balijský chrám nepoznáte podle jedné uzavřené budovy, ale podle systému tří nádvoří (Tri Mandala), která se hierarchicky zvedají a vedou věřícího od profánního k posvátnému.</p>`
+    },
+    {
         id: "2026041001",
         title: "Bali - promlouvající architektura (1)",
         date: "10 dubna, 2026",
