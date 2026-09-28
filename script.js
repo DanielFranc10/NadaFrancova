@@ -1,11 +1,10 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
+const API_URL = "/api/blogs";
 
 let quillEditor;
 let allBlogs = []; 
 let currentPage = 1;
-const blogsPerPage = 6; // Počet článků na jednu stránku (3 x 2)
+const blogsPerPage = 6; 
 
-// ZÁLOŽNÍ BLOGY vyextrahované z PDF. Zobrazí se automaticky, i když API nevrátí nic.
 const DEFAULT_BLOGS = [
     {
         id: "2026041001",
@@ -53,20 +52,22 @@ const DEFAULT_BLOGS = [
 
 async function fetchBlogs() {
     try {
-        const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
-        const data = await response.json();
-        // Spojí články z tabulky s těmi defaultními z kódu, pokud v tabulce chybí
-        let combined = data && data.length > 0 ? data : [];
-        DEFAULT_BLOGS.forEach(db => {
-            if (!combined.find(cb => cb.id == db.id)) {
-                combined.push(db);
-            }
-        });
-        return combined;
+        const response = await fetch(API_URL);
+        if (response.ok) {
+            const data = await response.json();
+            let combined = data && data.length > 0 ? data : [];
+            
+            DEFAULT_BLOGS.forEach(db => {
+                if (!combined.find(cb => cb.id == db.id)) {
+                    combined.push(db);
+                }
+            });
+            return combined;
+        }
     } catch (err) {
-        console.error("Načítání z API selhalo, používám defaultní pole.", err);
-        return DEFAULT_BLOGS;
+        console.warn("Nacitam vychozi clanky.");
     }
+    return DEFAULT_BLOGS;
 }
 
 async function renderBlogGrid() {
@@ -74,21 +75,16 @@ async function renderBlogGrid() {
     if (!container) return;
 
     if (allBlogs.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Načítám články...</p>'; 
         allBlogs = await fetchBlogs();
     }
 
-    // Seřazení podle ID sestupně (nejnovější první)
     allBlogs.sort((a, b) => Number(b.id) - Number(a.id));
-
     container.innerHTML = ''; 
     container.className = 'three-col-grid';
 
-    // Detekce, zda jsme na hlavní stránce (nemá stránkovací panel)
     const paginationControls = document.getElementById('pagination-controls');
     const isHomePage = !paginationControls;
 
-    // Logika zobrazení pro stránku
     let displayBlogs = [];
     if (isHomePage) {
         displayBlogs = allBlogs.slice(0, blogsPerPage);
@@ -111,9 +107,7 @@ async function renderBlogGrid() {
         container.appendChild(article);
     });
 
-    if (!isHomePage) {
-        renderPagination();
-    }
+    if (!isHomePage) renderPagination();
 }
 
 function renderPagination() {
@@ -131,9 +125,7 @@ function renderPagination() {
         btn.className = 'page-btn' + (i === currentPage ? ' active' : '');
         btn.onclick = () => {
             currentPage = i;
-            // Opětovné vykreslení dané stránky
-            const container = document.getElementById('dynamic-blog-grid');
-            container.innerHTML = '';
+            document.getElementById('dynamic-blog-grid').innerHTML = '';
             renderBlogGrid();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
@@ -154,14 +146,13 @@ async function renderSingleArticle() {
 
     if (blog) {
         document.title = `${blog.title} | Blog`;
-        
         container.innerHTML = `
             <h1>${blog.title}</h1>
             <div class="meta">${blog.date}</div>
             <div class="article-content">${blog.content}</div>
         `;
     } else {
-        container.innerHTML = `<h1>Článek nenalezen</h1><p>Tento článek neexistuje nebo byl stažen.</p><a href="blog.html">← Zpět na blog</a>`;
+        container.innerHTML = `<h1>Článek nenalezen</h1><p>Neexistuje nebo byl stažen.</p><a href="blog.html">← Zpět na blog</a>`;
     }
 }
 
@@ -225,7 +216,11 @@ async function deleteBlog(event, id) {
     if(confirm("Smazat článek z databáze? Výchozí články v kódu smazat nelze.")) {
         event.target.innerText = "Mažu...";
         try {
-            await fetch(API_URL + "?action=delete&id=" + id, { method: "POST", redirect: "follow" });
+            await fetch(API_URL, { 
+                method: "POST", 
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "delete", id: id })
+            });
             await renderAdminList(); 
         } catch (err) {
             alert("Chyba při mazání.");
@@ -242,7 +237,7 @@ function initQuillEditor() {
                 [{ 'header': [1, 2, 3, false] }],
                 ['bold', 'italic', 'underline'],
                 [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                ['link'], // Odstraněna podpora obrázků
+                ['link'], 
                 ['clean']
             ]
         }
@@ -252,7 +247,7 @@ function initQuillEditor() {
 async function addNewBlog(event) {
     event.preventDefault();
     const btn = document.getElementById('publish-btn');
-    btn.innerText = "Odesílám do databáze..."; btn.disabled = true;
+    btn.innerText = "Odesílám..."; btn.disabled = true;
 
     const title = document.getElementById('new-title').value;
     const date = document.getElementById('new-date').value;
@@ -262,8 +257,6 @@ async function addNewBlog(event) {
     const dateObj = new Date(date);
     const months = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"];
     const formattedDate = `${dateObj.getDate()} ${months[dateObj.getMonth()]}, ${dateObj.getFullYear()}`;
-
-    // Vygenerujeme ID pomocí času. Tím se zaručí, že nové články mají větší ID a jsou řazeny jako nejnovější.
     const newId = Date.now().toString();
 
     const newBlog = {
@@ -275,18 +268,17 @@ async function addNewBlog(event) {
     };
 
     try {
-        await fetch(API_URL + "?action=add", { 
+        await fetch(API_URL, { 
             method: "POST", 
-            headers: { "Content-Type": "text/plain;charset=utf-8" }, 
-            redirect: "follow", 
-            body: JSON.stringify(newBlog) 
+            headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify({ action: "add", blog: newBlog }) 
         });
         document.getElementById('add-blog-form').reset();
         quillEditor.setContents([]); 
         await renderAdminList();
         alert('Článek úspěšně publikován.');
     } catch (err) {
-        alert("Chyba při odesílání do Tabulky Google.");
+        alert("Chyba připojení na API.");
     }
     btn.innerText = "Publikovat článek"; btn.disabled = false;
 }
