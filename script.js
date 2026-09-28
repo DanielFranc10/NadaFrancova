@@ -1,18 +1,71 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
 
-// Vlož svůj nový GitHub token
-const GITHUB_TOKEN = "VLOZ_NOVY_TOKEN"; 
-const GITHUB_USER = "DanielFranc10"; 
-const GITHUB_REPO = "blog-fotky"; 
-
 let quillEditor;
+let allBlogs = []; 
+let currentPage = 1;
+const blogsPerPage = 6; // Počet článků na jednu stránku (3 x 2)
+
+// ZÁLOŽNÍ BLOGY vyextrahované z PDF. Zobrazí se automaticky, i když API nevrátí nic.
+const DEFAULT_BLOGS = [
+    {
+        id: "2026041001",
+        title: "Bali - promlouvající architektura (1)",
+        date: "10 dubna, 2026",
+        excerpt: "Existuje mnoho architektonických směrů, které kladou důraz na estetiku, funkci, harmonii či jsou podřízeny vyšším řádům...",
+        content: `<p>Existuje mnoho architektonických směrů, které kladou důraz na estetiku, funkci, harmonii či jsou podřízeny vyšším řádům, ale na mě osobně nejvíce zapůsobila architektura balijská. Jeví se mi, že je významově naplněná až „po okraj“.</p>
+        <p>Nepřestává mne fascinovat a cítím z ní neobyčejný klid a harmonii, která pramení z hlubokého pocitu pokory člověka a propojení s duchovním světem i přírodou.</p>
+        <h2>Duchovní kořeny a vlivy</h2>
+        <p>Balijská architektura je neodmyslitelně spjata s tzv. „balijským hinduismem„. Klíčovým prvkem je snaha o dosažení rovnováhy mezi božskými silami, lidmi a přírodou. Design byl v historii ovlivněn především hinduistickým učením z Indie a obdobím říše Majapahit.</p>
+        <h2>Rozeklaná brána (Gapura Bentar)</h2>
+        <p>Ikonickým symbolem balijské architektury je rozeklaná brána, známá jako Gapura Bentar. Skládá se ze dvou zrcadlových struktur, které vypadají jako hora rozdělená vpůli. Tento tvar symbolizuje posvátnou horu Meru (Sumeru) a představuje přechod z profánního vnějšího světa do posvátného vnitřního prostoru.</p>`
+    },
+    {
+        id: "2026040901",
+        title: "Plánujete stavět či kupovat pozemek pro určitý záměr?",
+        date: "9 dubna, 2026",
+        excerpt: "Koupě parcely je pro většinu z nás životní investicí. Aby se však váš sen o bydlení neproměnil v noční můru, vyplatí se věnovat pár hodin vlastní rešerši...",
+        content: `<p>Koupě parcely je pro většinu z nás životní investicí. Aby se však váš sen o bydlení neproměnil v noční můru, vyplatí se věnovat pár hodin vlastní rešerši ještě předtím, než podepíšete kupní smlouvu nebo postavíte například pergolu nebo garáž.</p>
+        <h2>1. Kdy je třeba projekt a povolení?</h2>
+        <p>Stavební zákon prošel v posledních letech velkými změnami. Jde například o velmi malé kůlny nebo bazény za dodržení určitých podmínek. Pozor: I tyto stavby musí být v souladu s územním plánem a obecnými požadavky na výstavbu!</p>
+        <h2>2. Zkontrolujte si katastr a územní plán</h2>
+        <p>Podívejte se, zda na pozemku neváznou věcná břemena nebo ochranná pásma. Ta mohou výrazně omezit plochu, kde smíte stavět. Najděte si webovou stránku obce a zjistěte si, do jaké funkční plochy váš pozemek patří.</p>`
+    },
+    {
+        id: "2026040601",
+        title: "Projekt není jen výkres: Co všechno se děje, než „padne“ razítko?",
+        date: "6 dubna, 2026",
+        excerpt: "Mnoho investorů si představuje, že cesta k vlastní stavbě je přímočará: architekt/projektant nakreslí jejich vizi, dá na ni razítko...",
+        content: `<p><strong>Nejde jen o výkres</strong></p>
+        <p>Mnoho investorů si představuje, že cesta k vlastní stavbě je přímočará: architekt/projektant nakreslí jejich vizi, dá na ni razítko a tím je hotovo. Realita je ale mnohem komplexnější proces, kde samotné kreslení tvoří jen špičku ledovce.</p>
+        <h2>Zásadní je územní plán</h2>
+        <p>Prvním krokem projektanta není překreslování skic od stavebníka, ale důkladná analýza, zda je záměr v souladu s územním plánem. Projektant musí např. zjistit, zda je daný záměr v lokalitě přípustný.</p>
+        <h2>Jednání s „dotčenými orgány“</h2>
+        <p>Když má projekt jasné obrysy, přichází klíčová fáze – získání stanovisek např. od hasičů, hygieny či památkářů. Povolení stavby není jen administrativní formalita, ale odborně náročná činnost.</p>`
+    },
+    {
+        id: "2019111001",
+        title: "Tvorba vizualizací a zákresů",
+        date: "10 listopadu, 2019",
+        excerpt: "Pro vaši představu vytvořím zákres pergoly, zimní zahrady nebo markýzy do fotografie nebo její 3D model včetně nejbližšího okolí...",
+        content: `<p>Pro vaši představu vytvořím zákres pergoly, zimní zahrady nebo markýzy do fotografie nebo její 3D model včetně nejbližšího okolí. V druhé variantě je možné výrobek vidět z ptačí perspektivy.</p>`
+    }
+];
 
 async function fetchBlogs() {
     try {
         const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
-        return await response.json();
+        const data = await response.json();
+        // Spojí články z tabulky s těmi defaultními z kódu, pokud v tabulce chybí
+        let combined = data && data.length > 0 ? data : [];
+        DEFAULT_BLOGS.forEach(db => {
+            if (!combined.find(cb => cb.id == db.id)) {
+                combined.push(db);
+            }
+        });
+        return combined;
     } catch (err) {
-        return [];
+        console.error("Načítání z API selhalo, používám defaultní pole.", err);
+        return DEFAULT_BLOGS;
     }
 }
 
@@ -20,46 +73,72 @@ async function renderBlogGrid() {
     const container = document.getElementById('dynamic-blog-grid');
     if (!container) return;
 
-    container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Načítám články...</p>'; 
-    const blogs = await fetchBlogs();
-    container.innerHTML = ''; 
-
-    if (!blogs || blogs.length === 0) {
-        container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Zatím nejsou publikovány žádné články.</p>';
-        return;
+    if (allBlogs.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Načítám články...</p>'; 
+        allBlogs = await fetchBlogs();
     }
 
-    // Limit zobrazení na max 6 článků
-    const displayBlogs = blogs.slice(0, 6);
-    
-    // Grid pro obě stránky je 3-sloupcový (viz CSS .three-col-grid)
+    // Seřazení podle ID sestupně (nejnovější první)
+    allBlogs.sort((a, b) => Number(b.id) - Number(a.id));
+
+    container.innerHTML = ''; 
     container.className = 'three-col-grid';
 
-    displayBlogs.forEach((blog) => {
-        // Hledání obrázku v textu. Pokud žádný není, použijeme defaultní
-        let coverImg = "nahled.png";
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = blog.content;
-        const firstImg = tempDiv.querySelector('img');
-        if (firstImg) {
-            coverImg = firstImg.src;
-        }
+    // Detekce, zda jsme na hlavní stránce (nemá stránkovací panel)
+    const paginationControls = document.getElementById('pagination-controls');
+    const isHomePage = !paginationControls;
 
+    // Logika zobrazení pro stránku
+    let displayBlogs = [];
+    if (isHomePage) {
+        displayBlogs = allBlogs.slice(0, blogsPerPage);
+    } else {
+        const startIndex = (currentPage - 1) * blogsPerPage;
+        displayBlogs = allBlogs.slice(startIndex, startIndex + blogsPerPage);
+    }
+
+    displayBlogs.forEach((blog) => {
         const article = document.createElement('article');
         article.className = 'post-card';
         article.innerHTML = `
-            <a href="clanek.html?id=${blog.id}">
-                <img src="${coverImg}" class="blog-card-img" alt="${blog.title}">
-            </a>
             <div class="post-card-content">
-                <div class="blog-category">Uncategorized</div>
+                <div class="blog-category">Architektura</div>
                 <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
-                <div class="blog-meta">administrator / ${blog.date}</div>
+                <div class="blog-meta">${blog.date}</div>
                 <p>${blog.excerpt}</p>
             </div>
         `;
         container.appendChild(article);
     });
+
+    if (!isHomePage) {
+        renderPagination();
+    }
+}
+
+function renderPagination() {
+    const paginationContainer = document.getElementById('pagination-controls');
+    if (!paginationContainer) return;
+    
+    paginationContainer.innerHTML = '';
+    const totalPages = Math.ceil(allBlogs.length / blogsPerPage);
+    
+    if (totalPages <= 1) return;
+
+    for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        btn.className = 'page-btn' + (i === currentPage ? ' active' : '');
+        btn.onclick = () => {
+            currentPage = i;
+            // Opětovné vykreslení dané stránky
+            const container = document.getElementById('dynamic-blog-grid');
+            container.innerHTML = '';
+            renderBlogGrid();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+        paginationContainer.appendChild(btn);
+    }
 }
 
 async function renderSingleArticle() {
@@ -70,16 +149,16 @@ async function renderSingleArticle() {
     const urlParams = new URLSearchParams(window.location.search);
     const blogId = urlParams.get('id');
     
-    const blogs = await fetchBlogs();
-    const blog = blogs.find(b => b.id.toString() === blogId.toString());
+    allBlogs = await fetchBlogs();
+    const blog = allBlogs.find(b => b.id.toString() === blogId.toString());
 
     if (blog) {
         document.title = `${blog.title} | Blog`;
         
         container.innerHTML = `
             <h1>${blog.title}</h1>
-            <div class="meta">Napsal administrator / ${blog.date}</div>
-            ${blog.content}
+            <div class="meta">${blog.date}</div>
+            <div class="article-content">${blog.content}</div>
         `;
     } else {
         container.innerHTML = `<h1>Článek nenalezen</h1><p>Tento článek neexistuje nebo byl stažen.</p><a href="blog.html">← Zpět na blog</a>`;
@@ -122,15 +201,16 @@ async function renderAdminList() {
     if (!list) return;
 
     list.innerHTML = '<li>Načítám data...</li>';
-    const blogs = await fetchBlogs();
+    allBlogs = await fetchBlogs();
+    allBlogs.sort((a, b) => Number(b.id) - Number(a.id));
     list.innerHTML = '';
 
-    if (!blogs || blogs.length === 0) {
+    if (!allBlogs || allBlogs.length === 0) {
         list.innerHTML = '<li>Zatím žádné články.</li>';
         return;
     }
 
-    blogs.forEach(blog => {
+    allBlogs.forEach(blog => {
         const li = document.createElement('li');
         li.className = 'admin-list-item';
         li.innerHTML = `
@@ -142,11 +222,11 @@ async function renderAdminList() {
 }
 
 async function deleteBlog(event, id) {
-    if(confirm("Smazat článek z databáze?")) {
+    if(confirm("Smazat článek z databáze? Výchozí články v kódu smazat nelze.")) {
         event.target.innerText = "Mažu...";
         try {
             await fetch(API_URL + "?action=delete&id=" + id, { method: "POST", redirect: "follow" });
-            renderAdminList(); 
+            await renderAdminList(); 
         } catch (err) {
             alert("Chyba při mazání.");
         }
@@ -158,69 +238,21 @@ function initQuillEditor() {
     quillEditor = new Quill('#editor-container', {
         theme: 'snow',
         modules: {
-            toolbar: {
-                container: [
-                    [{ 'header': [1, 2, 3, false] }],
-                    ['bold', 'italic', 'underline'],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    ['link', 'image'], 
-                    ['clean']
-                ],
-                handlers: { image: uploadImageToGitHub }
-            }
+            toolbar: [
+                [{ 'header': [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['link'], // Odstraněna podpora obrázků
+                ['clean']
+            ]
         }
     });
-}
-
-function uploadImageToGitHub() {
-    const range = quillEditor.getSelection(true);
-    const index = range ? range.index : 0;
-    const input = document.createElement('input');
-    input.setAttribute('type', 'file');
-    input.setAttribute('accept', 'image/*');
-    input.click();
-
-    input.onchange = async () => {
-        const file = input.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = async () => {
-            const base64Content = reader.result.split(',')[1];
-            const safeName = file.name.replace(/[^a-zA-Z0-9.]/g, '');
-            const fileName = `img_${Date.now()}_${safeName}`; 
-            const url = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/blog-images/${fileName}`;
-
-            try {
-                alert("Nahrávám obrázek na GitHub.");
-                const response = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ message: `Upload obrázku: ${fileName}`, content: base64Content })
-                });
-
-                if (response.ok) {
-                    const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/blog-images/${fileName}`;
-                    quillEditor.insertEmbed(index, 'image', rawUrl);
-                } else {
-                    const data = await response.json();
-                    alert("Chyba GitHubu: " + data.message);
-                }
-            } catch (err) {
-                alert("Chyba API spojení.");
-            }
-        };
-    };
 }
 
 async function addNewBlog(event) {
     event.preventDefault();
     const btn = document.getElementById('publish-btn');
-    btn.innerText = "Odesílám do tabulky..."; btn.disabled = true;
+    btn.innerText = "Odesílám do databáze..."; btn.disabled = true;
 
     const title = document.getElementById('new-title').value;
     const date = document.getElementById('new-date').value;
@@ -231,23 +263,30 @@ async function addNewBlog(event) {
     const months = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"];
     const formattedDate = `${dateObj.getDate()} ${months[dateObj.getMonth()]}, ${dateObj.getFullYear()}`;
 
+    // Vygenerujeme ID pomocí času. Tím se zaručí, že nové články mají větší ID a jsou řazeny jako nejnovější.
+    const newId = Date.now().toString();
+
     const newBlog = {
-        id: Date.now().toString(),
+        id: newId,
         title: title,
         date: formattedDate,
         excerpt: excerpt,
-        image: "", 
         content: contentHtml 
     };
 
     try {
-        await fetch(API_URL + "?action=add", { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow", body: JSON.stringify(newBlog) });
+        await fetch(API_URL + "?action=add", { 
+            method: "POST", 
+            headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+            redirect: "follow", 
+            body: JSON.stringify(newBlog) 
+        });
         document.getElementById('add-blog-form').reset();
         quillEditor.setContents([]); 
         await renderAdminList();
-        alert('Článek publikován.');
+        alert('Článek úspěšně publikován.');
     } catch (err) {
-        alert("Chyba při odesílání do Tabulky.");
+        alert("Chyba při odesílání do Tabulky Google.");
     }
     btn.innerText = "Publikovat článek"; btn.disabled = false;
 }
