@@ -94,8 +94,8 @@ body {
 
 .icon-nav-container {
     display: flex;
-    justify-content: center;
-    gap: 70px;
+    justify-content: space-between;
+    gap: 20px;
     margin-bottom: 60px;
     flex-wrap: wrap; 
 }
