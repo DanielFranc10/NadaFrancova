@@ -43,7 +43,6 @@ body {
     font-size: 1.1rem;
 }
 
-/* --- HERO SEKCE --- */
 .hero {
     display: flex;
     align-items: flex-start;
@@ -93,7 +92,6 @@ body {
     margin: 0 -20px; 
 }
 
-/* --- IKONOVÁ NAVIGACE --- */
 .icon-nav-container {
     display: flex;
     justify-content: center;
@@ -131,7 +129,6 @@ body {
     text-align: center;
 }
 
-/* --- BLOG MŘÍŽKA --- */
 .three-col-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -139,7 +136,6 @@ body {
     margin-bottom: 60px;
 }
 
-/* Blokový design kartičky s blogem */
 .post-card {
     display: flex;
     flex-direction: column;
@@ -202,7 +198,6 @@ body {
     color: var(--text-main);
 }
 
-/* --- OBSAHOVÉ STRÁNKY --- */
 .page-text {
     line-height: 1.8;
     font-size: 1rem;
@@ -259,7 +254,6 @@ footer {
     cursor: text;
 }
 
-/* --- ADMINISTRACE --- */
 .login-box {
     max-width: 400px;
     margin: 4rem auto;
@@ -392,7 +386,6 @@ footer {
     .content-wrapper { padding: 30px 20px; }
 }
 
-/* --- STRÁNKOVÁNÍ A TLAČÍTKA --- */
 .pagination {
     display: flex;
     justify-content: center;
