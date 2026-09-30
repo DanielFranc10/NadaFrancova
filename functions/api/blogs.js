@@ -21,6 +21,13 @@ export async function onRequest(context) {
             blogs.push(body.blog);
         } else if (body.action === "delete") {
             blogs = blogs.filter(b => b.id !== body.id);
+        } else if (body.action === "edit") {
+            const index = blogs.findIndex(b => b.id === body.blog.id);
+            if (index !== -1) {
+                blogs[index] = body.blog;
+            } else {
+                blogs.push(body.blog);
+            }
         }
 
         await env.BLOG_KV.put("blogs_data", JSON.stringify(blogs));
