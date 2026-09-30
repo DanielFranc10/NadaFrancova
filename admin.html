@@ -35,13 +35,14 @@
             </div>
 
             <div id="tab-blog" class="tab-content" style="display: block;">
-                <h3>Napsat nový článek (Pouze text)</h3>
+                <h3>Napsat / Upravit článek (Pouze text)</h3>
                 <form id="add-blog-form" class="admin-form" onsubmit="addNewBlog(event)">
                     <input type="text" id="new-title" placeholder="Název článku" required>
                     <input type="date" id="new-date" required>
                     <input type="text" id="new-excerpt" placeholder="Krátký perex" required>
                     <div class="editor-wrap"><div id="editor-container"></div></div>
                     <button type="submit" id="publish-btn">Publikovat článek</button>
+                    <button type="button" id="cancel-edit-btn" style="display:none; background:#6b7280; margin-top:10px; width:100%; padding:15px; color:white; border:none; border-radius:4px; font-weight:700; cursor:pointer;" onclick="cancelEdit()">Zrušit úpravy</button>
                 </form>
 
                 <h3 style="margin-top: 4rem;">Existující články</h3>
