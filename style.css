@@ -58,7 +58,7 @@ body {
     filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.15)) sepia(0.3);
 }
 
-/* Mřížka pro DOMOVSKOU STRÁNKU (index.html) - 4 sloupce */
+/* Navigace s Ikonami */
 .four-col-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -67,8 +67,22 @@ body {
     padding-bottom: 1rem;
     margin-bottom: 2rem;
 }
-#index-blog-grid {
-    border: none;
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+.nav-item svg {
+    width: 32px;
+    height: 32px;
+    fill: var(--text-main);
+    margin-bottom: 0.5rem;
+    transition: fill 0.3s ease;
+}
+.nav-item:hover svg {
+    fill: #8b7d6b;
 }
 
 .nav-item a {
@@ -80,6 +94,14 @@ body {
 .nav-item a.active {
     border-bottom: 2px solid var(--text-main);
     padding-bottom: 0.3rem;
+}
+
+/* Mřížka pro DOMOVSKOU STRÁNKU (index.html) - 3 sloupce na novinky */
+#index-blog-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    border: none;
 }
 
 /* Mřížka pro BLOG STRÁNKU (blog.html) - 3 sloupce x 2 řádky */
@@ -101,7 +123,6 @@ body {
 
 /* Karta článku */
 .post-card { display: flex; flex-direction: column; margin-bottom: 2rem; }
-.post-card.index-card { margin-bottom: 3rem; }
 .post-card h3 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.1rem; }
 .post-card h3 a { text-decoration: none; color: var(--text-main); border-bottom: 1px solid var(--text-main); }
 .post-card p { font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem; }
@@ -125,9 +146,7 @@ body {
     color: var(--text-light);
     border-radius: 3px;
 }
-.pagination button:hover {
-    background: var(--bg-outer);
-}
+.pagination button:hover { background: var(--bg-outer); }
 .pagination button.active-page {
     background: var(--text-main);
     color: white;
@@ -163,50 +182,25 @@ footer {
     cursor: pointer;
     font-family: inherit;
     font-weight: bold;
+    transition: background 0.3s;
 }
 .admin-post-list { list-style: none; padding: 0; }
 .admin-post-item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     padding: 1rem 0;
     border-bottom: 1px solid var(--line-color);
 }
-.delete-btn { background: #d9534f; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
-
-/* KANBAN BOARD TRACKER */
-.kanban-board {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 1.5rem;
-    margin-top: 2rem;
-    align-items: start;
-}
-.kanban-col {
-    background-color: var(--bg-outer);
-    padding: 1rem;
-    border-radius: 6px;
-    border-top: 4px solid var(--text-main);
-}
-.kanban-col h3 { font-size: 1rem; text-align: center; margin-bottom: 1rem; text-transform: uppercase; }
-.tracker-card {
-    background-color: var(--bg-inner);
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 4px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-.tracker-card h4 { margin-bottom: 0.5rem; font-size: 0.95rem; }
-.tracker-card p { font-size: 0.8rem; margin-bottom: 0.5rem; color: var(--text-light); }
-.tracker-card select { width: 100%; padding: 0.5rem; border: 1px solid var(--line-color); border-radius: 3px; font-family: inherit; font-size: 0.8rem; }
+.delete-btn { background: #d9534f; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; margin-left: 5px; }
+.edit-btn { background: #f0ad4e; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
 
 @media (max-width: 900px) {
     .four-col-grid { grid-template-columns: repeat(2, 1fr); }
-    .three-col-grid { grid-template-columns: repeat(2, 1fr); }
-    .kanban-board { grid-template-columns: repeat(2, 1fr); }
+    .three-col-grid, #index-blog-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
     .four-col-grid { grid-template-columns: 1fr; }
-    .three-col-grid { grid-template-columns: 1fr; }
-    .kanban-board { grid-template-columns: 1fr; }
+    .three-col-grid, #index-blog-grid { grid-template-columns: 1fr; }
     .hero { flex-direction: column; }
 }
