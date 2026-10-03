@@ -12,10 +12,9 @@
         <div class="inner-content">
             <header class="top-header">
                 <a href="index.html">← Zpět na web</a>
-                <a href="tracker.html" style="float: right;">Správa projektů (Tracker) →</a>
             </header>
 
-            <div class="page-text">
+            <div class="page-text" style="max-width: 100%;">
                 <div id="login-screen" style="max-width: 400px; margin: 0 auto; text-align: center; display: none;">
                     <h2>Přihlášení do administrace</h2>
                     <br>
@@ -30,29 +29,40 @@
                         <button onclick="logout()" style="padding: 8px 15px; background: transparent; border: 1px solid #33322e; cursor: pointer;">Odhlásit se</button>
                     </div>
                     
-                    <h3 style="margin-top: 0;">Přidat nový článek</h3>
-                    <form id="add-blog-form" class="admin-form" onsubmit="addNewBlog(event)">
-                        <input type="text" id="new-title" placeholder="Název článku" required>
-                        <input type="date" id="new-date" required>
-                        
-                        <div style="background: #e6e4dc; padding: 10px; margin-bottom: 20px; border-radius: 4px;">
-                            <label style="display: block; font-size: 0.85rem; color: #5a5753; margin-bottom: 5px;">Náhledová fotka (bude nahrána na Google Disk)</label>
-                            <input type="file" id="new-image-file" accept="image/png, image/jpeg, image/webp" style="margin-bottom: 0;">
-                        </div>
-                        
-                        <textarea id="new-excerpt" rows="3" placeholder="Krátký popis (náhled do menu)" required></textarea>
-                        
-                        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: -10px;">
-                            <button type="button" onclick="insertImageToContent()" style="background: #8b7d6b; color: white; padding: 0.6rem 1rem; font-size: 0.8rem; border-radius: 4px; text-transform: none; font-weight: normal; letter-spacing: normal;">+ Vložit fotku do textu</button>
-                            <small style="color: #5a5753;">Klikni, pokud chceš přidat obrázek kamkoliv mezi odstavce.</small>
-                        </div>
-                        
-                        <textarea id="new-content" rows="10" placeholder="Celý text článku (HTML tagy povoleny)..." required></textarea>
-                        <button type="submit">Publikovat článek</button>
-                    </form>
+                    <div style="max-width: 800px;">
+                        <h3 style="margin-top: 0;">Přidat / Upravit článek</h3>
+                        <form id="add-blog-form" class="admin-form" onsubmit="addNewBlog(event)">
+                            <input type="text" id="new-title" placeholder="Název článku" required>
+                            
+                            <!-- Povinné datum zrušeno kvůli plynulejší editaci -->
+                            <input type="date" id="new-date">
+                            
+                            <div style="background: #e6e4dc; padding: 10px; margin-bottom: 20px; border-radius: 4px;">
+                                <label style="display: block; font-size: 0.85rem; color: #5a5753; margin-bottom: 5px;">Náhledová fotka pro mřížku (bude nahrána na Google Disk)</label>
+                                <input type="file" id="new-image-file" accept="image/png, image/jpeg, image/webp" style="margin-bottom: 0;">
+                            </div>
+                            
+                            <textarea id="new-excerpt" rows="3" placeholder="Krátký popis (náhled do menu)" required></textarea>
+                            
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: -10px;">
+                                <button type="button" onclick="insertImageToContent()" style="background: #8b7d6b; color: white; padding: 0.6rem 1rem; font-size: 0.8rem; border-radius: 4px; text-transform: none; font-weight: normal; letter-spacing: normal; width: auto;">+ Vložit fotku do textu</button>
+                                <small style="color: #5a5753;">Klikni, pokud chceš přidat obrázek kamkoliv mezi odstavce.</small>
+                            </div>
+                            
+                            <textarea id="new-content" rows="10" placeholder="Celý text článku (HTML tagy povoleny)..." required></textarea>
+                            <button type="submit" style="width: auto;">Publikovat článek</button>
+                        </form>
 
-                    <h3 style="margin-top: 4rem;">Existující články</h3>
-                    <ul id="admin-post-list" class="admin-post-list"></ul>
+                        <h3 style="margin-top: 4rem;">Existující články</h3>
+                        <ul id="admin-post-list" class="admin-post-list"></ul>
+                    </div>
+
+                    <!-- NÁHLED PROJECT TRACKERU PŘÍMO V ADMINU -->
+                    <div style="margin-top: 5rem;">
+                        <h2 style="border-bottom: 2px solid var(--text-main); padding-bottom: 10px;">Náhled Project Trackeru</h2>
+                        <iframe src="https://project-tracker-esni.onrender.com" width="100%" height="700px" style="border: 1px solid var(--line-color); border-radius: 8px; margin-top: 1rem; background: white;"></iframe>
+                    </div>
+
                 </div>
             </div>
         </div>
