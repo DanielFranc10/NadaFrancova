@@ -1,6 +1,6 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
 
-// --- KOMUNIKACE S GOOGLE TABULKOU ---
+// --- BLOG LOGIKA ---
 async function fetchBlogs() {
     try {
         const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
@@ -10,49 +10,33 @@ async function fetchBlogs() {
     }
 }
 
-// --- VYKRESLENÍ BLOGŮ DO MŘÍŽKY (Nyní s obrázky) ---
 async function renderBlogGrid() {
     const container = document.getElementById('dynamic-blog-grid');
     if (!container) return;
 
-    container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Načítám data z databáze...</p>'; 
+    container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Načítám data z databáze...</p>'; 
     const blogs = await fetchBlogs();
     container.innerHTML = ''; 
 
     if (!blogs || blogs.length === 0) {
-        container.innerHTML = '<p style="grid-column: span 4; text-align: center;">Na webu zatím nejsou publikovány žádné články.</p>';
+        container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Zatím nejsou publikovány žádné články.</p>';
         return;
     }
 
-    let currentColumn = document.createElement('div');
-    
-    blogs.forEach((blog, index) => {
-        if (index > 0 && index % 2 === 0) {
-            container.appendChild(currentColumn);
-            currentColumn = document.createElement('div');
-        }
-
+    blogs.forEach((blog) => {
         const article = document.createElement('article');
         article.className = 'post-card';
-        
-        // Pokud je zadán náhledový obrázek, vykreslí se nad nadpisem
-        let imageHtml = blog.image ? `<img src="${blog.image}" alt="Náhled" style="width:100%; height:180px; object-fit:cover; margin-bottom:1rem; border-radius:3px;">` : '';
-        
+        let imageHtml = blog.image ? `<img src="${blog.image}" alt="Náhled" style="width:100%; height:200px; object-fit:cover; margin-bottom:1rem; border-radius:3px;">` : '';
         article.innerHTML = `
             ${imageHtml}
-            <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
+            <h3 style="margin-top:0;"><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
             <p>${blog.excerpt}</p>
             <time>${blog.date}</time>
         `;
-        currentColumn.appendChild(article);
+        container.appendChild(article);
     });
-    
-    if (currentColumn.hasChildNodes()) {
-        container.appendChild(currentColumn);
-    }
 }
 
-// --- VYKRESLENÍ DETAILU ROZKLIKNUTÉHO ČLÁNKU ---
 async function renderSingleArticle() {
     const container = document.getElementById('dynamic-article');
     if (!container) return;
@@ -60,14 +44,12 @@ async function renderSingleArticle() {
     container.innerHTML = '<p>Otevírám článek...</p>';
     const urlParams = new URLSearchParams(window.location.search);
     const blogId = urlParams.get('id');
-    
     const blogs = await fetchBlogs();
     const blog = blogs.find(b => b.id.toString() === blogId.toString());
 
     if (blog) {
         document.title = `${blog.title} | Blog`;
         let imageHtml = blog.image ? `<img src="${blog.image}" alt="${blog.title}" style="width:100%; max-height:400px; object-fit:cover; margin: 2rem 0; border-radius: 4px;">` : '';
-        
         container.innerHTML = `
             <h1>${blog.title}</h1>
             <div class="meta">Napsal administrator / ${blog.date}</div>
@@ -79,27 +61,21 @@ async function renderSingleArticle() {
     }
 }
 
-// --- VLOŽENÍ FOTKY PŘÍMO DO TEXTU (Nová funkce) ---
 function insertImageToContent() {
     const url = prompt("Vlož URL adresu obrázku (např. https://...):");
     if (url) {
         const textarea = document.getElementById('new-content');
-        // Připraví se HTML kód obrázku, který se plynule přizpůsobí vzhledu
         const imgTag = `\n<img src="${url}" alt="Obrázek k článku" style="width:100%; height:auto; margin: 1.5rem 0; border-radius: 4px;">\n`;
-        
-        // Vloží obrázek tam, kde je zrovna kurzor
         const startPos = textarea.selectionStart;
         const endPos = textarea.selectionEnd;
         textarea.value = textarea.value.substring(0, startPos) + imgTag + textarea.value.substring(endPos, textarea.value.length);
-        
-        // Vrátí kurzor za vložený obrázek
         textarea.focus();
         textarea.selectionStart = startPos + imgTag.length;
         textarea.selectionEnd = startPos + imgTag.length;
     }
 }
 
-// --- ADMINISTRACE A PŘIHLAŠOVÁNÍ ---
+// --- ADMIN LOGIKA ---
 function checkLogin() {
     const adminSection = document.getElementById('admin-dashboard');
     const loginSection = document.getElementById('login-screen');
@@ -155,7 +131,6 @@ async function renderAdminList() {
     });
 }
 
-// --- OPRAVENÉ MAZÁNÍ ČLÁNKU ---
 async function deleteBlog(event, id) {
     if(confirm("Smazat článek? Provede se okamžitě i v tabulce.")) {
         const btn = event.target;
@@ -167,7 +142,7 @@ async function deleteBlog(event, id) {
                 method: "POST", 
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 redirect: "follow",
-                body: JSON.stringify({ id: id }) // Odesíláme ID v těle, prohlížeč ho už nezablokuje
+                body: JSON.stringify({ id: id })
             });
             await renderAdminList(); 
         } catch (err) {
@@ -178,18 +153,39 @@ async function deleteBlog(event, id) {
     }
 }
 
-// --- PŘIDÁNÍ NOVÉHO ČLÁNKU ---
 async function addNewBlog(event) {
     event.preventDefault();
     const btn = event.target.querySelector('button[type="submit"]');
-    btn.innerText = "Odesílám data do tabulky...";
+    btn.innerText = "Zpracovávám a odesílám data na Disk...";
     btn.disabled = true;
 
     const title = document.getElementById('new-title').value;
     const date = document.getElementById('new-date').value;
     const excerpt = document.getElementById('new-excerpt').value;
-    const image = document.getElementById('new-image').value;
     const content = document.getElementById('new-content').value;
+    const fileInput = document.getElementById('new-image-file');
+    
+    let imageBase64 = null;
+    let imageName = null;
+
+    const getBase64 = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        if(file.size > 3145728) {
+            alert("Soubor je příliš velký! Maximální velikost je 3 MB.");
+            btn.innerText = "Publikovat článek";
+            btn.disabled = false;
+            return;
+        }
+        imageBase64 = await getBase64(file);
+        imageName = file.name;
+    }
 
     const dateObj = new Date(date);
     const months = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"];
@@ -200,7 +196,8 @@ async function addNewBlog(event) {
         title: title,
         date: formattedDate,
         excerpt: excerpt,
-        image: image,
+        imageBase64: imageBase64,
+        imageName: imageName,
         content: content.replace(/\n/g, '<br>') 
     };
 
@@ -214,7 +211,7 @@ async function addNewBlog(event) {
         
         document.getElementById('add-blog-form').reset();
         await renderAdminList();
-        alert('Článek úspěšně publikován na web!');
+        alert('Článek úspěšně nahrán na web!');
     } catch (err) {
         alert("Něco se pokazilo, zkontrolujte konzoli.");
     }
@@ -223,9 +220,84 @@ async function addNewBlog(event) {
     btn.disabled = false;
 }
 
-// Inicializace funkcí
+// --- PROJECT TRACKER LOGIKA ---
+async function fetchProjects() {
+    try {
+        const response = await fetch(API_URL + "?action=readProjects&t=" + Date.now());
+        return await response.json();
+    } catch (err) { return []; }
+}
+
+async function renderTracker() {
+    const board = document.getElementById('kanban-board');
+    if (!board) return;
+
+    board.innerHTML = '<p>Načítám projekty...</p>';
+    const projects = await fetchProjects();
+    
+    const columns = { "Poptávka": "", "Studie": "", "Povolení": "", "Realizace": "", "Hotovo": "" };
+
+    projects.forEach(p => {
+        const card = `
+            <div class="tracker-card">
+                <h4>${p.name}</h4>
+                <p><strong>Klient:</strong> ${p.client}</p>
+                <p><strong>Deadline:</strong> ${p.deadline}</p>
+                <select onchange="updateStatus('${p.id}', this.value)">
+                    <option value="Poptávka" ${p.status === 'Poptávka' ? 'selected' : ''}>Poptávka</option>
+                    <option value="Studie" ${p.status === 'Studie' ? 'selected' : ''}>Studie</option>
+                    <option value="Povolení" ${p.status === 'Povolení' ? 'selected' : ''}>Stavební povolení</option>
+                    <option value="Realizace" ${p.status === 'Realizace' ? 'selected' : ''}>Realizace</option>
+                    <option value="Hotovo" ${p.status === 'Hotovo' ? 'selected' : ''}>Hotovo</option>
+                </select>
+            </div>
+        `;
+        if (columns[p.status] !== undefined) columns[p.status] += card;
+    });
+
+    board.innerHTML = Object.keys(columns).map(col => `
+        <div class="kanban-col">
+            <h3>${col}</h3>
+            ${columns[col]}
+        </div>
+    `).join('');
+}
+
+async function addNewProject(event) {
+    event.preventDefault();
+    const btn = event.target.querySelector('button');
+    btn.innerText = "Ukládám...";
+    btn.disabled = true;
+
+    const newProject = {
+        id: Date.now().toString(),
+        name: document.getElementById('proj-name').value,
+        client: document.getElementById('proj-client').value,
+        deadline: document.getElementById('proj-deadline').value,
+        status: "Poptávka"
+    };
+
+    await fetch(API_URL + "?action=addProject", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        redirect: "follow",
+        body: JSON.stringify(newProject)
+    });
+
+    document.getElementById('add-project-form').reset();
+    await renderTracker();
+    btn.innerText = "Přidat projekt";
+    btn.disabled = false;
+}
+
+async function updateStatus(id, newStatus) {
+    await fetch(`${API_URL}?action=updateProjectStatus&id=${id}&status=${newStatus}`, { method: "POST", redirect: "follow" });
+    renderTracker();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     renderBlogGrid();
     renderSingleArticle();
+    renderTracker();
     checkLogin();
 });
