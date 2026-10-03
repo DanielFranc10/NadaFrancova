@@ -5,22 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog | Ing. arch. Naďa Francová. Ph.D.</title>
     <link rel="stylesheet" href="style.css">
-    <script src="udrzba.js"></script>
     <script src="script.js" defer></script>
 </head>
 <body>
     <main class="container">
-        <header class="top-header">
-            <a href="index.html">Ing. arch. Naďa Francová. Ph.D.</a>
-        </header>
+        <div class="inner-content">
+            <header class="top-header">
+                <a href="index.html">Ing. arch. Naďa Francová. Ph.D.</a>
+            </header>
 
-        <h1 style="text-align:center; margin-bottom: 50px;">Blog</h1>
-        
-        <div id="dynamic-blog-grid"></div>
-        
-        <div id="pagination-controls" class="pagination"></div>
+            <section class="hero">
+                <div class="hero-text">
+                    <h1>ARCHITEKTURA &<br>VIZUALIZACE</h1>
+                    <p>I TEN NEJMENŠÍ DETAIL V SOBĚ UKRÝVÁ VLASTNÍ A NEPŘEBERNĚ PESTRÝ VESMÍR</p>
+                </div>
+                <div class="hero-image">
+                    <img src="nahled.png" alt="Architektura Vizualizace">
+                </div>
+            </section>
+        </div>
 
-        <footer>Copyright <a href="admin.html" class="stealth-link">©</a> 2026 archfrancova.cz</footer>
+        <div class="content-wrapper">
+            <nav class="four-col-grid">
+                <div class="nav-item"><a href="o-mne.html">O MNĚ</a></div>
+                <div class="nav-item"><a href="sluzby.html">SLUŽBY</a></div>
+                <div class="nav-item"><a href="blog.html" class="active">BLOG</a></div>
+                <div class="nav-item"><a href="reference.html">REFERENCE</a></div>
+            </nav>
+
+            <!-- Zde se načte 3x2 mřížka článků VČETNĚ FOTEK -->
+            <div id="dynamic-blog-grid" class="three-col-grid blog-posts">
+            </div>
+            
+            <!-- Zde se vykreslí stránkování 1 2 3 Následující -->
+            <div id="pagination-controls" class="pagination">
+            </div>
+        </div>
+
+        <footer>
+            Copyright <a href="admin.html" class="stealth-link">©</a> 2026 Evoluce zateplování: Od HERAKLITU k hi-tech izolacím
+        </footer>
     </main>
 </body>
 </html>
