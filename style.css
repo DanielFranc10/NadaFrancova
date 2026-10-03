@@ -58,7 +58,6 @@ body {
     filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.15)) sepia(0.3);
 }
 
-/* Navigace s Ikonami */
 .four-col-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -74,15 +73,14 @@ body {
     align-items: center;
     text-align: center;
 }
-.nav-item svg {
-    width: 32px;
-    height: 32px;
-    fill: var(--text-main);
-    margin-bottom: 0.5rem;
-    transition: fill 0.3s ease;
-}
-.nav-item:hover svg {
-    fill: #8b7d6b;
+
+/* STRIKTNÍ LIMIT VELIKOSTI IKON */
+.nav-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    display: block;
 }
 
 .nav-item a {
@@ -96,7 +94,6 @@ body {
     padding-bottom: 0.3rem;
 }
 
-/* Mřížka pro DOMOVSKOU STRÁNKU (index.html) - 3 sloupce na novinky */
 #index-blog-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -104,7 +101,6 @@ body {
     border: none;
 }
 
-/* Mřížka pro BLOG STRÁNKU (blog.html) - 3 sloupce x 2 řádky */
 .three-col-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -112,7 +108,6 @@ body {
     align-items: start;
 }
 
-/* Obrázek v mřížce u blogu */
 .blog-thumb {
     width: 100%;
     height: 200px;
@@ -121,14 +116,12 @@ body {
     border-radius: 3px;
 }
 
-/* Karta článku */
 .post-card { display: flex; flex-direction: column; margin-bottom: 2rem; }
 .post-card h3 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.1rem; }
 .post-card h3 a { text-decoration: none; color: var(--text-main); border-bottom: 1px solid var(--text-main); }
 .post-card p { font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem; }
 .post-card time { font-size: 0.8rem; color: var(--text-light); }
 
-/* STRÁNKOVÁNÍ (Pagination) */
 .pagination {
     display: flex;
     justify-content: center;
