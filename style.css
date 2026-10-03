@@ -58,6 +58,7 @@ body {
     filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.15)) sepia(0.3);
 }
 
+/* Mřížka pro DOMOVSKOU STRÁNKU (index.html) - 4 sloupce */
 .four-col-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -66,6 +67,10 @@ body {
     padding-bottom: 1rem;
     margin-bottom: 2rem;
 }
+#index-blog-grid {
+    border: none;
+}
+
 .nav-item a {
     text-decoration: none;
     color: var(--text-main);
@@ -77,20 +82,57 @@ body {
     padding-bottom: 0.3rem;
 }
 
-/* Oprava: Pevná mřížka 3 sloupců pro blogy */
-#dynamic-blog-grid {
+/* Mřížka pro BLOG STRÁNKU (blog.html) - 3 sloupce x 2 řádky */
+.three-col-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 3rem 2rem;
     align-items: start;
-    border: none;
 }
 
-.post-card { display: flex; flex-direction: column; }
-.post-card h3 { margin-bottom: 0.5rem; font-size: 1.1rem; }
+/* Obrázek v mřížce u blogu */
+.blog-thumb {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border-radius: 3px;
+}
+
+/* Karta článku */
+.post-card { display: flex; flex-direction: column; margin-bottom: 2rem; }
+.post-card.index-card { margin-bottom: 3rem; }
+.post-card h3 { margin-top: 0; margin-bottom: 0.5rem; font-size: 1.1rem; }
 .post-card h3 a { text-decoration: none; color: var(--text-main); border-bottom: 1px solid var(--text-main); }
 .post-card p { font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem; }
 .post-card time { font-size: 0.8rem; color: var(--text-light); }
+
+/* STRÁNKOVÁNÍ (Pagination) */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--line-color);
+}
+.pagination button {
+    background: transparent;
+    border: 1px solid var(--line-color);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--text-light);
+    border-radius: 3px;
+}
+.pagination button:hover {
+    background: var(--bg-outer);
+}
+.pagination button.active-page {
+    background: var(--text-main);
+    color: white;
+    border-color: var(--text-main);
+}
 
 .page-text { max-width: 800px; }
 .meta { color: var(--text-light); font-size: 0.9rem; margin-bottom: 2rem; }
@@ -105,7 +147,7 @@ footer {
 }
 .stealth-link { text-decoration: none; color: inherit; cursor: text; }
 
-.admin-form input, .admin-form textarea {
+.admin-form input, .admin-form textarea, .admin-form select {
     width: 100%;
     padding: 0.8rem;
     margin-bottom: 1rem;
@@ -158,12 +200,13 @@ footer {
 .tracker-card select { width: 100%; padding: 0.5rem; border: 1px solid var(--line-color); border-radius: 3px; font-family: inherit; font-size: 0.8rem; }
 
 @media (max-width: 900px) {
-    #dynamic-blog-grid { grid-template-columns: repeat(2, 1fr); }
+    .four-col-grid { grid-template-columns: repeat(2, 1fr); }
+    .three-col-grid { grid-template-columns: repeat(2, 1fr); }
     .kanban-board { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
-    #dynamic-blog-grid { grid-template-columns: 1fr; }
+    .four-col-grid { grid-template-columns: 1fr; }
+    .three-col-grid { grid-template-columns: 1fr; }
     .kanban-board { grid-template-columns: 1fr; }
     .hero { flex-direction: column; }
-    .four-col-grid { grid-template-columns: 1fr; }
 }
