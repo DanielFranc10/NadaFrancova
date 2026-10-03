@@ -1,5 +1,8 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
 
+let editingBlogId = null;
+let currentOldImage = "";
+
 // --- NAČÍTÁNÍ DAT ---
 async function fetchBlogs() {
     try {
@@ -10,7 +13,7 @@ async function fetchBlogs() {
     }
 }
 
-// --- VYKRESLENÍ PRO INDEX.HTML (4 sloupce, BEZ FOTEK) ---
+// --- VYKRESLENÍ PRO INDEX.HTML (Pouze 3 nejnovější) ---
 async function renderIndexGrid() {
     const container = document.getElementById('index-blog-grid');
     if (!container) return;
@@ -24,15 +27,9 @@ async function renderIndexGrid() {
         return;
     }
 
-    let currentColumn = document.createElement('div');
+    const latestBlogs = blogs.slice(0, 3); // JEN 3 NEJNOVĚJŠÍ
     
-    // Na indexu skládáme články do sloupců po dvou
-    blogs.forEach((blog, index) => {
-        if (index > 0 && index % 2 === 0) {
-            container.appendChild(currentColumn);
-            currentColumn = document.createElement('div');
-        }
-
+    latestBlogs.forEach((blog) => {
         const article = document.createElement('article');
         article.className = 'post-card index-card';
         article.innerHTML = `
@@ -40,12 +37,8 @@ async function renderIndexGrid() {
             <p>${blog.excerpt}</p>
             <time>${blog.date}</time>
         `;
-        currentColumn.appendChild(article);
+        container.appendChild(article);
     });
-    
-    if (currentColumn.hasChildNodes()) {
-        container.appendChild(currentColumn);
-    }
 }
 
 // --- VYKRESLENÍ PRO BLOG.HTML (Mřížka 3x2, S FOTKOU A STRÁNKOVÁNÍM) ---
@@ -66,14 +59,12 @@ async function renderBlogGrid(page = 1) {
         return;
     }
 
-    // Logika stránkování
     const totalPages = Math.ceil(blogs.length / POSTS_PER_PAGE);
     const startIndex = (page - 1) * POSTS_PER_PAGE;
     const currentBlogs = blogs.slice(startIndex, startIndex + POSTS_PER_PAGE);
 
     container.innerHTML = ''; 
 
-    // Vykreslení článků pro aktuální stránku
     currentBlogs.forEach((blog) => {
         const article = document.createElement('article');
         article.className = 'post-card';
@@ -87,7 +78,6 @@ async function renderBlogGrid(page = 1) {
         container.appendChild(article);
     });
 
-    // Vykreslení tlačítek stránkování dole
     if (pagination) {
         let pagHtml = '';
         for(let i = 1; i <= totalPages; i++) {
@@ -139,7 +129,7 @@ function insertImageToContent() {
     }
 }
 
-// --- ADMINISTRACE A PŘIHLAŠOVÁNÍ ---
+// --- ADMINISTRACE LOGIKA ---
 function checkLogin() {
     const adminSection = document.getElementById('admin-dashboard');
     const loginSection = document.getElementById('login-screen');
@@ -189,10 +179,34 @@ async function renderAdminList() {
         li.className = 'admin-post-item';
         li.innerHTML = `
             <span>${blog.title}</span>
-            <button class="delete-btn" onclick="deleteBlog(event, '${blog.id}')">Smazat</button>
+            <div>
+                <button class="edit-btn" onclick="editBlog('${blog.id}')">Upravit</button>
+                <button class="delete-btn" onclick="deleteBlog(event, '${blog.id}')">Smazat</button>
+            </div>
         `;
         list.appendChild(li);
     });
+}
+
+// --- EDITACE ČLÁNKU ---
+async function editBlog(id) {
+    const blogs = await fetchBlogs();
+    const blog = blogs.find(b => b.id.toString() === id.toString());
+    
+    if (blog) {
+        editingBlogId = blog.id;
+        currentOldImage = blog.image || "";
+        
+        document.getElementById('new-title').value = blog.title;
+        document.getElementById('new-excerpt').value = blog.excerpt;
+        document.getElementById('new-content').value = blog.content.replace(/<br>/g, '\n');
+        
+        const btn = document.querySelector('#add-blog-form button[type="submit"]');
+        btn.innerText = "Uložit změny (Upravit)";
+        btn.style.background = "#4CAF50"; // Zelená barva pro editaci
+        
+        window.scrollTo({ top: document.getElementById('add-blog-form').offsetTop - 50, behavior: 'smooth' });
+    }
 }
 
 async function deleteBlog(event, id) {
@@ -220,11 +234,12 @@ async function deleteBlog(event, id) {
 async function addNewBlog(event) {
     event.preventDefault();
     const btn = event.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerText;
     btn.innerText = "Zpracovávám a odesílám data na Disk...";
     btn.disabled = true;
 
     const title = document.getElementById('new-title').value;
-    const date = document.getElementById('new-date').value;
+    const dateInput = document.getElementById('new-date').value;
     const excerpt = document.getElementById('new-excerpt').value;
     const content = document.getElementById('new-content').value;
     const fileInput = document.getElementById('new-image-file');
@@ -243,7 +258,7 @@ async function addNewBlog(event) {
         const file = fileInput.files[0];
         if(file.size > 3145728) {
             alert("Soubor je příliš velký! Maximální velikost je 3 MB.");
-            btn.innerText = "Publikovat článek";
+            btn.innerText = originalText;
             btn.disabled = false;
             return;
         }
@@ -251,31 +266,46 @@ async function addNewBlog(event) {
         imageName = file.name;
     }
 
-    const dateObj = new Date(date);
-    const months = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"];
-    const formattedDate = `${dateObj.getDate()} ${months[dateObj.getMonth()]}, ${dateObj.getFullYear()}`;
+    // Formátování data
+    let formattedDate = "";
+    if (dateInput) {
+        const dateObj = new Date(dateInput);
+        const months = ["ledna", "února", "března", "dubna", "května", "června", "července", "srpna", "září", "října", "listopadu", "prosince"];
+        formattedDate = `${dateObj.getDate()} ${months[dateObj.getMonth()]}, ${dateObj.getFullYear()}`;
+    } else {
+        formattedDate = "Neuvedeno";
+    }
 
-    const newBlog = {
-        id: Date.now().toString(),
+    const payloadData = {
+        id: editingBlogId ? editingBlogId : Date.now().toString(),
         title: title,
         date: formattedDate,
         excerpt: excerpt,
+        image: editingBlogId ? currentOldImage : "", // Pokud edituji a nenahraji novou, zachová se stará
         imageBase64: imageBase64,
         imageName: imageName,
         content: content.replace(/\n/g, '<br>') 
     };
 
+    const actionUrl = editingBlogId ? "?action=update" : "?action=add";
+
     try {
-        await fetch(API_URL + "?action=add", {
+        await fetch(API_URL + actionUrl, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             redirect: "follow",
-            body: JSON.stringify(newBlog)
+            body: JSON.stringify(payloadData)
         });
         
         document.getElementById('add-blog-form').reset();
+        
+        // Reset formuláře po úspěšné editaci
+        editingBlogId = null;
+        currentOldImage = "";
+        btn.style.background = "var(--text-main)";
+        
         await renderAdminList();
-        alert('Článek úspěšně nahrán na web!');
+        alert('Data úspěšně uložena!');
     } catch (err) {
         alert("Něco se pokazilo, zkontrolujte konzoli.");
     }
@@ -284,89 +314,10 @@ async function addNewBlog(event) {
     btn.disabled = false;
 }
 
-// --- PROJECT TRACKER LOGIKA ---
-async function fetchProjects() {
-    try {
-        const response = await fetch(API_URL + "?action=readProjects&t=" + Date.now());
-        return await response.json();
-    } catch (err) { return []; }
-}
-
-async function renderTracker() {
-    const board = document.getElementById('kanban-board');
-    if (!board) return;
-
-    board.innerHTML = '<p>Načítám projekty...</p>';
-    const projects = await fetchProjects();
-    
-    const columns = { "Poptávka": "", "Studie": "", "Povolení": "", "Realizace": "", "Hotovo": "" };
-
-    projects.forEach(p => {
-        const card = `
-            <div class="tracker-card">
-                <h4>${p.name}</h4>
-                <p><strong>Klient:</strong> ${p.client}</p>
-                <p><strong>Deadline:</strong> ${p.deadline}</p>
-                <select onchange="updateStatus('${p.id}', this.value)">
-                    <option value="Poptávka" ${p.status === 'Poptávka' ? 'selected' : ''}>Poptávka</option>
-                    <option value="Studie" ${p.status === 'Studie' ? 'selected' : ''}>Studie</option>
-                    <option value="Povolení" ${p.status === 'Povolení' ? 'selected' : ''}>Stavební povolení</option>
-                    <option value="Realizace" ${p.status === 'Realizace' ? 'selected' : ''}>Realizace</option>
-                    <option value="Hotovo" ${p.status === 'Hotovo' ? 'selected' : ''}>Hotovo</option>
-                </select>
-            </div>
-        `;
-        if (columns[p.status] !== undefined) columns[p.status] += card;
-    });
-
-    board.innerHTML = Object.keys(columns).map(col => `
-        <div class="kanban-col">
-            <h3>${col}</h3>
-            ${columns[col]}
-        </div>
-    `).join('');
-}
-
-async function addNewProject(event) {
-    event.preventDefault();
-    const btn = event.target.querySelector('button');
-    btn.innerText = "Ukládám...";
-    btn.disabled = true;
-
-    const newProject = {
-        id: Date.now().toString(),
-        name: document.getElementById('proj-name').value,
-        client: document.getElementById('proj-client').value,
-        deadline: document.getElementById('proj-deadline').value,
-        status: "Poptávka"
-    };
-
-    await fetch(API_URL + "?action=addProject", {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        redirect: "follow",
-        body: JSON.stringify(newProject)
-    });
-
-    document.getElementById('add-project-form').reset();
-    await renderTracker();
-    btn.innerText = "Přidat projekt";
-    btn.disabled = false;
-}
-
-async function updateStatus(id, newStatus) {
-    await fetch(`${API_URL}?action=updateProjectStatus&id=${id}&status=${newStatus}`, { method: "POST", redirect: "follow" });
-    renderTracker();
-}
-
 // INICIALIZACE - Rozpozná, co má na jaké stránce načíst
 document.addEventListener('DOMContentLoaded', () => {
     renderIndexGrid();
     renderBlogGrid();
     renderSingleArticle();
     checkLogin();
-    
-    if(typeof renderTracker === 'function') {
-        renderTracker();
-    }
 });
