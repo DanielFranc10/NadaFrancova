@@ -284,6 +284,81 @@ async function addNewBlog(event) {
     btn.disabled = false;
 }
 
+// --- PROJECT TRACKER LOGIKA ---
+async function fetchProjects() {
+    try {
+        const response = await fetch(API_URL + "?action=readProjects&t=" + Date.now());
+        return await response.json();
+    } catch (err) { return []; }
+}
+
+async function renderTracker() {
+    const board = document.getElementById('kanban-board');
+    if (!board) return;
+
+    board.innerHTML = '<p>Načítám projekty...</p>';
+    const projects = await fetchProjects();
+    
+    const columns = { "Poptávka": "", "Studie": "", "Povolení": "", "Realizace": "", "Hotovo": "" };
+
+    projects.forEach(p => {
+        const card = `
+            <div class="tracker-card">
+                <h4>${p.name}</h4>
+                <p><strong>Klient:</strong> ${p.client}</p>
+                <p><strong>Deadline:</strong> ${p.deadline}</p>
+                <select onchange="updateStatus('${p.id}', this.value)">
+                    <option value="Poptávka" ${p.status === 'Poptávka' ? 'selected' : ''}>Poptávka</option>
+                    <option value="Studie" ${p.status === 'Studie' ? 'selected' : ''}>Studie</option>
+                    <option value="Povolení" ${p.status === 'Povolení' ? 'selected' : ''}>Stavební povolení</option>
+                    <option value="Realizace" ${p.status === 'Realizace' ? 'selected' : ''}>Realizace</option>
+                    <option value="Hotovo" ${p.status === 'Hotovo' ? 'selected' : ''}>Hotovo</option>
+                </select>
+            </div>
+        `;
+        if (columns[p.status] !== undefined) columns[p.status] += card;
+    });
+
+    board.innerHTML = Object.keys(columns).map(col => `
+        <div class="kanban-col">
+            <h3>${col}</h3>
+            ${columns[col]}
+        </div>
+    `).join('');
+}
+
+async function addNewProject(event) {
+    event.preventDefault();
+    const btn = event.target.querySelector('button');
+    btn.innerText = "Ukládám...";
+    btn.disabled = true;
+
+    const newProject = {
+        id: Date.now().toString(),
+        name: document.getElementById('proj-name').value,
+        client: document.getElementById('proj-client').value,
+        deadline: document.getElementById('proj-deadline').value,
+        status: "Poptávka"
+    };
+
+    await fetch(API_URL + "?action=addProject", {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        redirect: "follow",
+        body: JSON.stringify(newProject)
+    });
+
+    document.getElementById('add-project-form').reset();
+    await renderTracker();
+    btn.innerText = "Přidat projekt";
+    btn.disabled = false;
+}
+
+async function updateStatus(id, newStatus) {
+    await fetch(`${API_URL}?action=updateProjectStatus&id=${id}&status=${newStatus}`, { method: "POST", redirect: "follow" });
+    renderTracker();
+}
+
 // INICIALIZACE - Rozpozná, co má na jaké stránce načíst
 document.addEventListener('DOMContentLoaded', () => {
     renderIndexGrid();
