@@ -1,6 +1,6 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyeM7NNWBm-Pc75pVBEwpyqfXjqodJ_hyD-ufo50xbd9XQT0K1u6FIer77tWC4oTK7j/exec";
 
-// --- BLOG LOGIKA ---
+// --- NAČÍTÁNÍ DAT ---
 async function fetchBlogs() {
     try {
         const response = await fetch(API_URL + "?action=read&t=" + new Date().getTime());
@@ -10,23 +10,74 @@ async function fetchBlogs() {
     }
 }
 
-async function renderBlogGrid() {
-    const container = document.getElementById('dynamic-blog-grid');
+// --- VYKRESLENÍ PRO INDEX.HTML (4 sloupce, BEZ FOTEK) ---
+async function renderIndexGrid() {
+    const container = document.getElementById('index-blog-grid');
     if (!container) return;
 
-    container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Načítám data z databáze...</p>'; 
+    container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Načítám data z databáze...</p>';
     const blogs = await fetchBlogs();
-    container.innerHTML = ''; 
+    container.innerHTML = '';
 
     if (!blogs || blogs.length === 0) {
         container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Zatím nejsou publikovány žádné články.</p>';
         return;
     }
 
-    blogs.forEach((blog) => {
+    let currentColumn = document.createElement('div');
+    
+    // Na indexu skládáme články do sloupců po dvou
+    blogs.forEach((blog, index) => {
+        if (index > 0 && index % 2 === 0) {
+            container.appendChild(currentColumn);
+            currentColumn = document.createElement('div');
+        }
+
+        const article = document.createElement('article');
+        article.className = 'post-card index-card';
+        article.innerHTML = `
+            <h3><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
+            <p>${blog.excerpt}</p>
+            <time>${blog.date}</time>
+        `;
+        currentColumn.appendChild(article);
+    });
+    
+    if (currentColumn.hasChildNodes()) {
+        container.appendChild(currentColumn);
+    }
+}
+
+// --- VYKRESLENÍ PRO BLOG.HTML (Mřížka 3x2, S FOTKOU A STRÁNKOVÁNÍM) ---
+const POSTS_PER_PAGE = 6;
+
+async function renderBlogGrid(page = 1) {
+    const container = document.getElementById('dynamic-blog-grid');
+    const pagination = document.getElementById('pagination-controls');
+    if (!container) return;
+
+    if (page === 1) container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Načítám data z databáze...</p>'; 
+    
+    const blogs = await fetchBlogs();
+    
+    if (!blogs || blogs.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center;">Zatím nejsou publikovány žádné články.</p>';
+        if (pagination) pagination.innerHTML = '';
+        return;
+    }
+
+    // Logika stránkování
+    const totalPages = Math.ceil(blogs.length / POSTS_PER_PAGE);
+    const startIndex = (page - 1) * POSTS_PER_PAGE;
+    const currentBlogs = blogs.slice(startIndex, startIndex + POSTS_PER_PAGE);
+
+    container.innerHTML = ''; 
+
+    // Vykreslení článků pro aktuální stránku
+    currentBlogs.forEach((blog) => {
         const article = document.createElement('article');
         article.className = 'post-card';
-        let imageHtml = blog.image ? `<img src="${blog.image}" alt="Náhled" style="width:100%; height:200px; object-fit:cover; margin-bottom:1rem; border-radius:3px;">` : '';
+        let imageHtml = blog.image ? `<img src="${blog.image}" alt="Náhled" class="blog-thumb">` : '';
         article.innerHTML = `
             ${imageHtml}
             <h3 style="margin-top:0;"><a href="clanek.html?id=${blog.id}">${blog.title}</a></h3>
@@ -35,8 +86,21 @@ async function renderBlogGrid() {
         `;
         container.appendChild(article);
     });
+
+    // Vykreslení tlačítek stránkování dole
+    if (pagination) {
+        let pagHtml = '';
+        for(let i = 1; i <= totalPages; i++) {
+            pagHtml += `<button onclick="renderBlogGrid(${i})" class="${i === page ? 'active-page' : ''}">${i}</button>`;
+        }
+        if (page < totalPages) {
+            pagHtml += `<button onclick="renderBlogGrid(${page + 1})">Následující</button>`;
+        }
+        pagination.innerHTML = pagHtml;
+    }
 }
 
+// --- DETAIL ČLÁNKU ---
 async function renderSingleArticle() {
     const container = document.getElementById('dynamic-article');
     if (!container) return;
@@ -75,7 +139,7 @@ function insertImageToContent() {
     }
 }
 
-// --- ADMIN LOGIKA ---
+// --- ADMINISTRACE A PŘIHLAŠOVÁNÍ ---
 function checkLogin() {
     const adminSection = document.getElementById('admin-dashboard');
     const loginSection = document.getElementById('login-screen');
@@ -220,84 +284,14 @@ async function addNewBlog(event) {
     btn.disabled = false;
 }
 
-// --- PROJECT TRACKER LOGIKA ---
-async function fetchProjects() {
-    try {
-        const response = await fetch(API_URL + "?action=readProjects&t=" + Date.now());
-        return await response.json();
-    } catch (err) { return []; }
-}
-
-async function renderTracker() {
-    const board = document.getElementById('kanban-board');
-    if (!board) return;
-
-    board.innerHTML = '<p>Načítám projekty...</p>';
-    const projects = await fetchProjects();
-    
-    const columns = { "Poptávka": "", "Studie": "", "Povolení": "", "Realizace": "", "Hotovo": "" };
-
-    projects.forEach(p => {
-        const card = `
-            <div class="tracker-card">
-                <h4>${p.name}</h4>
-                <p><strong>Klient:</strong> ${p.client}</p>
-                <p><strong>Deadline:</strong> ${p.deadline}</p>
-                <select onchange="updateStatus('${p.id}', this.value)">
-                    <option value="Poptávka" ${p.status === 'Poptávka' ? 'selected' : ''}>Poptávka</option>
-                    <option value="Studie" ${p.status === 'Studie' ? 'selected' : ''}>Studie</option>
-                    <option value="Povolení" ${p.status === 'Povolení' ? 'selected' : ''}>Stavební povolení</option>
-                    <option value="Realizace" ${p.status === 'Realizace' ? 'selected' : ''}>Realizace</option>
-                    <option value="Hotovo" ${p.status === 'Hotovo' ? 'selected' : ''}>Hotovo</option>
-                </select>
-            </div>
-        `;
-        if (columns[p.status] !== undefined) columns[p.status] += card;
-    });
-
-    board.innerHTML = Object.keys(columns).map(col => `
-        <div class="kanban-col">
-            <h3>${col}</h3>
-            ${columns[col]}
-        </div>
-    `).join('');
-}
-
-async function addNewProject(event) {
-    event.preventDefault();
-    const btn = event.target.querySelector('button');
-    btn.innerText = "Ukládám...";
-    btn.disabled = true;
-
-    const newProject = {
-        id: Date.now().toString(),
-        name: document.getElementById('proj-name').value,
-        client: document.getElementById('proj-client').value,
-        deadline: document.getElementById('proj-deadline').value,
-        status: "Poptávka"
-    };
-
-    await fetch(API_URL + "?action=addProject", {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        redirect: "follow",
-        body: JSON.stringify(newProject)
-    });
-
-    document.getElementById('add-project-form').reset();
-    await renderTracker();
-    btn.innerText = "Přidat projekt";
-    btn.disabled = false;
-}
-
-async function updateStatus(id, newStatus) {
-    await fetch(`${API_URL}?action=updateProjectStatus&id=${id}&status=${newStatus}`, { method: "POST", redirect: "follow" });
-    renderTracker();
-}
-
+// INICIALIZACE - Rozpozná, co má na jaké stránce načíst
 document.addEventListener('DOMContentLoaded', () => {
+    renderIndexGrid();
     renderBlogGrid();
     renderSingleArticle();
-    renderTracker();
     checkLogin();
+    
+    if(typeof renderTracker === 'function') {
+        renderTracker();
+    }
 });
