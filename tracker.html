@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Project Tracker | Administrace</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <main class="container">
+        <div class="inner-content">
+            <header class="top-header">
+                <a href="admin.html">← Zpět do Admin Panelu (Blog)</a>
+            </header>
+
+            <h2>Přidat nový projekt do sledování</h2>
+            <form id="add-project-form" class="admin-form" onsubmit="addNewProject(event)" style="max-width: 600px; margin-bottom: 3rem;">
+                <input type="text" id="proj-name" placeholder="Název zakázky (např. Vila Praha)" required>
+                <input type="text" id="proj-client" placeholder="Jméno klienta" required>
+                <input type="date" id="proj-deadline" required>
+                <button type="submit">Přidat projekt</button>
+            </form>
+
+            <h2>Přehled zakázek (Kanban board)</h2>
+            <div id="kanban-board" class="kanban-board">
+                <!-- Dynamicky plněno přes JS do 5 sloupců -->
+            </div>
+        </div>
+        <footer>
+            Copyright <a href="admin.html" class="stealth-link">©</a> 2026 archfrancova.cz
+        </footer>
+    </main>
+</body>
+</html>
