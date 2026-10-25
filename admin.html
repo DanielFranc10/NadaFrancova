@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Administrace | Ing. arch. Naďa Francová, Ph.D.</title>
+    <link rel="icon" href="i1.png" type="image/png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@7.9.3/tinymce.min.js" referrerpolicy="origin" defer></script>
+    <script src="admin.js" defer></script>
+</head>
+<body class="admin">
+    <main class="container">
+        <header class="top-header">
+            <a href="index.html">← Zpět na web</a>
+            <div id="admin-user-bar" class="admin-user-bar" hidden>
+                <span id="admin-user-name"></span>
+                <button type="button" class="btn btn-ghost btn-sm" id="btn-password">Změnit heslo</button>
+                <button type="button" class="btn btn-ghost btn-sm" id="btn-logout">Odhlásit se</button>
+            </div>
+        </header>
+
+        <!-- PŘIHLÁŠENÍ -->
+        <section id="login-screen" class="login-box" hidden>
+            <h2>Přihlášení do administrace</h2>
+            <form id="login-form" autocomplete="on">
+                <label class="field">
+                    <span>Přihlašovací jméno</span>
+                    <input type="text" id="admin-user" name="username" autocomplete="username" required>
+                </label>
+                <label class="field">
+                    <span>Heslo</span>
+                    <input type="password" id="admin-pass" name="password" autocomplete="current-password" required>
+                </label>
+                <p class="form-error" id="login-error" role="alert"></p>
+                <button type="submit" class="btn btn-primary btn-block" id="login-btn">Přihlásit</button>
+            </form>
+        </section>
+
+        <!-- ADMINISTRACE -->
+        <section id="admin-dashboard" hidden>
+            <nav class="admin-tabs" role="tablist">
+                <a href="#/blog" class="tab-btn" data-tab="blog" role="tab">Správa blogu</a>
+                <a href="#/tracker" class="tab-btn" data-tab="tracker" role="tab">Project Tracker</a>
+            </nav>
+
+            <!-- SEZNAM ČLÁNKŮ -->
+            <div id="view-list" class="admin-view" hidden>
+                <div class="admin-header">
+                    <h1>Články</h1>
+                    <a href="#/blog/new" class="btn btn-primary">+ Nový článek</a>
+                </div>
+                <ul id="admin-post-list" class="admin-post-list"></ul>
+            </div>
+
+            <!-- EDITOR -->
+            <div id="view-editor" class="admin-view" hidden>
+                <div class="admin-header">
+                    <a href="#/blog" class="back-link" id="editor-back">← Zpět na seznam</a>
+                    <div class="editor-actions">
+                        <span class="save-state" id="save-state"></span>
+                        <a href="#" class="btn btn-ghost" id="btn-preview" target="_blank" rel="noopener" hidden>Zobrazit na webu</a>
+                        <button type="button" class="btn btn-primary" id="btn-save">Uložit</button>
+                    </div>
+                </div>
+
+                <div id="draft-banner" class="notice" hidden>
+                    <span id="draft-banner-text"></span>
+                    <button type="button" class="btn btn-sm btn-primary" id="draft-restore">Obnovit</button>
+                    <button type="button" class="btn btn-sm btn-ghost" id="draft-discard">Zahodit</button>
+                </div>
+
+                <form id="post-form" class="admin-form" novalidate>
+                    <label class="field">
+                        <span>Název článku</span>
+                        <input type="text" id="f-title" required maxlength="200">
+                    </label>
+
+                    <div class="field-row">
+                        <label class="field">
+                            <span>Datum</span>
+                            <input type="date" id="f-date" required>
+                        </label>
+                        <label class="field field-check">
+                            <input type="checkbox" id="f-published" checked>
+                            <span>Publikovat na webu <small>(bez zaškrtnutí se uloží jako koncept)</small></span>
+                        </label>
+                    </div>
+
+                    <label class="field">
+                        <span>Perex <small>(krátký úvod na kartičce; když ho necháte prázdný, vytvoří se z textu)</small></span>
+                        <textarea id="f-excerpt" rows="3" maxlength="400"></textarea>
+                    </label>
+
+                    <div class="field">
+                        <span>Úvodní obrázek <small>(zobrazí se na kartičce a nahoře v článku; když chybí, použije se první obrázek z textu)</small></span>
+                        <div class="cover-picker">
+                            <div class="cover-preview" id="cover-preview"><span>Bez obrázku</span></div>
+                            <div class="cover-buttons">
+                                <label class="btn btn-ghost">
+                                    Vybrat obrázek…
+                                    <input type="file" id="f-cover-file" accept="image/*" hidden>
+                                </label>
+                                <button type="button" class="btn btn-ghost" id="btn-cover-remove" hidden>Odebrat</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <span>Text článku <small>(obrázky vložíte tlačítkem obrázku v liště, přetažením nebo Ctrl+V)</small></span>
+                        <div class="editor-wrap"><textarea id="f-content"></textarea></div>
+                    </div>
+
+                    <div class="editor-footer">
+                        <button type="button" class="btn btn-danger-ghost" id="btn-delete" hidden>Smazat článek</button>
+                        <button type="submit" class="btn btn-primary">Uložit</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- PROJECT TRACKER -->
+            <div id="view-tracker" class="admin-view" hidden>
+                <div class="admin-header">
+                    <h1>Project Tracker</h1>
+                    <div class="editor-actions">
+                        <button type="button" class="btn btn-ghost" id="btn-tracker-import" title="Jednorázově načte projekty z původní aplikace na onrender.com">Převzít projekty ze starého trackeru</button>
+                        <a href="/tracker/" target="_blank" rel="noopener" class="btn btn-ghost">Otevřít v novém okně ↗</a>
+                    </div>
+                </div>
+                <iframe id="tracker-frame" class="tracker-iframe" title="Project Tracker"></iframe>
+            </div>
+        </section>
+
+        <footer>Copyright © 2026 Ing. arch. Naďa Francová, Ph.D.</footer>
+    </main>
+
+    <!-- ZMĚNA HESLA -->
+    <dialog id="password-dialog" class="dialog">
+        <form id="password-form" method="dialog">
+            <h2>Změna hesla</h2>
+            <label class="field">
+                <span>Současné heslo</span>
+                <input type="password" id="pw-current" autocomplete="current-password" required>
+            </label>
+            <label class="field">
+                <span>Nové heslo <small>(alespoň 10 znaků)</small></span>
+                <input type="password" id="pw-next" autocomplete="new-password" minlength="10" required>
+            </label>
+            <label class="field">
+                <span>Nové heslo znovu</span>
+                <input type="password" id="pw-next2" autocomplete="new-password" minlength="10" required>
+            </label>
+            <p class="form-error" id="pw-error" role="alert"></p>
+            <div class="dialog-actions">
+                <button type="button" class="btn btn-ghost" id="pw-cancel">Zrušit</button>
+                <button type="submit" class="btn btn-primary" id="pw-submit">Změnit heslo</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Tracker</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/tracker/style.css">
+</head>
+<body>
+    <div class="container main-wrapper">
+        <div id="login-view" class="glass card" style="display: none; max-width: 360px; margin: 15vh auto; text-align: center;">
+            <h2 style="margin-top: 0; color: #1e293b;">Nejste přihlášeni</h2>
+            <p>Přihlaste se v administraci webu.</p>
+            <a href="/admin.html#/tracker" target="_top" style="color: #3b82f6; font-weight: 600;">Přejít do administrace →</a>
+        </div>
+
+        <div id="admin-view" style="display: none;">
+            <div class="header-flex" style="max-width: 1200px; margin: 0 auto;">
+                <h2>Projekty</h2>
+                
+            </div>
+            <div class="glass card" style="margin-bottom: 30px; max-width: 1200px; margin: 0 auto 30px auto;">
+                <h3 style="margin-top: 0; color: #1e293b;">Založit nový projekt</h3>
+                <div class="form-grid">
+                    <input type="text" id="new-project-name" placeholder="Název projektu...">
+                    <input type="date" id="new-project-date" title="Datum začátku projektu">
+                    <button onclick="createProject()" class="success">Vytvořit projekt</button>
+                </div>
+            </div>
+            <div style="max-width: 1200px; margin: 0 auto;">
+                <div class="header-flex" style="margin-bottom: 20px;">
+                    <h3 style="margin: 0; color: #1e293b;">Přehled projektů</h3>
+                    <div class="project-filters">
+                        <button id="btn-filter-active" class="filter-btn active-filter" onclick="setFilter('active')">Aktivní</button>
+                        <button id="btn-filter-permitted" class="filter-btn" onclick="setFilter('permitted')">Povolené</button>
+                        <button id="btn-filter-done" class="filter-btn" onclick="setFilter('done')">Hotové</button>
+                    </div>
+                </div>
+                <div id="project-list" class="section-grid"></div>
+            </div>
+        </div>
+
+        <div id="project-detail-view" style="display: none;">
+            <div style="max-width: 100%; margin: 0 auto;">
+                <button id="back-btn" onclick="showAdminView()" class="btn-ghost" style="width: auto; margin-bottom: 20px;">&larr; Zpět na přehled</button>
+                <div class="glass card project-header">
+                    <div class="title-wrapper" id="title-display-wrapper">
+                        <h1 id="project-title" style="margin: 0; font-size: 2.2em; text-transform: uppercase; color: #1e293b;"></h1>
+                        <button id="edit-title-btn" class="edit-title-btn" onclick="toggleEditTitle()" title="Upravit název projektu">✏️</button>
+                    </div>
+                    
+                    <div id="edit-title-container" style="display: none; justify-content: center; align-items: center; gap: 10px;">
+                        <input type="text" id="edit-title-input" style="font-size: 1.3em; text-transform: uppercase; font-weight: bold; width: 100%; max-width: 800px; text-align: center;">
+                        <button onclick="saveNewTitle()" class="success" style="padding: 12px 20px; width: auto;">Uložit</button>
+                        <button onclick="toggleEditTitle()" class="btn-ghost" style="padding: 12px 20px; width: auto;">Zrušit</button>
+                    </div>
+
+                    <div class="project-meta" id="project-meta-date" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+            <div id="project-pipeline" class="horizontal-pipeline"></div>
+        </div>
+    </div>
+
+    <div id="item-modal" class="modal-backdrop" onclick="closeModal(event)">
+        <div class="glass card modal-content" onclick="event.stopPropagation()">
+            <div class="header-flex" style="margin-bottom: 15px;">
+                <h2 id="modal-title" style="margin: 0; font-size: 1.8em; color: #1e293b;"></h2>
+                <button onclick="closeModal()" class="btn-ghost" style="width: 40px; height: 40px; border-radius: 50%;">✕</button>
+            </div>
+            <div id="modal-status-badge" style="margin-bottom: 20px;"></div>
+            <div id="modal-body"></div>
+            <div id="modal-actions" style="margin-top: 25px; display: flex; gap: 10px;"></div>
+        </div>
+    </div>
+
+    <script src="/tracker/app.js"></script>
+</body>
+</html>
